@@ -1,0 +1,60 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { HeaderBar } from './HeaderBar';
+import { FooterBar } from './FooterBar';
+
+interface OverlayUIProps {
+  currentPage: number;
+  totalPages: number;
+}
+
+export const OverlayUI: React.FC<OverlayUIProps> = ({ 
+  currentPage, 
+  totalPages 
+}) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showUI = useCallback(() => {
+    setIsVisible(true);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = () => showUI();
+    const handleTouch = () => showUI();
+    const handleKeyDown = () => showUI();
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('touchstart', handleTouch);
+    document.addEventListener('keydown', handleKeyDown);
+
+    showUI();
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('touchstart', handleTouch);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [showUI]);
+
+  return (
+    <>
+      <HeaderBar isVisible={isVisible} />
+      <FooterBar 
+        isVisible={isVisible} 
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+      />
+    </>
+  );
+};
