@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { PdfViewer } from './components/PdfViewer';
 import { OverlayUI } from './components/OverlayUI';
 import { usePdfDocument } from './hooks/usePdfDocument';
+import { useKeyboard } from './hooks/useKeyboard';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +31,28 @@ const App: React.FC = () => {
     }
   }, [handleFileSelect]);
 
+  const handlePageChange = useCallback((page: number) => {
+    if (!pdfDocument) return;
+    
+    const clampedPage = Math.max(1, Math.min(page, pdfDocument.numPages));
+    setCurrentPage(clampedPage);
+  }, [pdfDocument]);
+
+  const goToPreviousPage = useCallback(() => {
+    handlePageChange(currentPage - 1);
+  }, [handlePageChange, currentPage]);
+
+  const goToNextPage = useCallback(() => {
+    handlePageChange(currentPage + 1);
+  }, [handlePageChange, currentPage]);
+
+  // キーボードショートカット
+  useKeyboard({
+    onPreviousPage: goToPreviousPage,
+    onNextPage: goToNextPage,
+    enabled: loadState.isLoaded,
+  });
+
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden relative no-select">
       <PdfViewer 
@@ -37,6 +60,7 @@ const App: React.FC = () => {
         loadState={loadState}
         currentPage={currentPage}
         isUIVisible={isUIVisible}
+        onPageChange={handlePageChange}
       />
       
       <OverlayUI 
@@ -44,6 +68,7 @@ const App: React.FC = () => {
         totalPages={pdfDocument?.numPages || 0}
         onFileSelect={handleFileSelect}
         onVisibilityChange={setIsUIVisible}
+        onPageChange={handlePageChange}
       />
       
       {!loadState.isLoaded && (

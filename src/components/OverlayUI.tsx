@@ -7,13 +7,15 @@ interface OverlayUIProps {
   totalPages: number;
   onFileSelect: (file: File) => void;
   onVisibilityChange?: (isVisible: boolean) => void;
+  onPageChange: (page: number) => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
   currentPage, 
   totalPages,
   onFileSelect,
-  onVisibilityChange
+  onVisibilityChange,
+  onPageChange
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -59,7 +61,8 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
       <FooterBar 
         isVisible={isVisible} 
         currentPage={currentPage} 
-        totalPages={totalPages} 
+        totalPages={totalPages}
+        onPageChange={onPageChange}
       />
     </>
   );

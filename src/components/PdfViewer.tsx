@@ -7,13 +7,15 @@ interface PdfViewerProps {
   loadState: PdfLoadState;
   currentPage: number;
   isUIVisible: boolean;
+  onPageChange?: (page: number) => void;
 }
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({ 
   pdfDocument, 
   loadState, 
   currentPage,
-  isUIVisible
+  isUIVisible,
+  onPageChange
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
@@ -156,9 +158,32 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     );
   }
 
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onPageChange || !pdfDocument) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const centerX = rect.width / 2;
+
+    if (clickX < centerX) {
+      // 左半分クリック：前のページ
+      if (currentPage > 1) {
+        onPageChange(currentPage - 1);
+      }
+    } else {
+      // 右半分クリック：次のページ
+      if (currentPage < pdfDocument.numPages) {
+        onPageChange(currentPage + 1);
+      }
+    }
+  };
+
   // PDF表示状態
   return (
-    <div className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+    <div 
+      className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden cursor-pointer"
+      onClick={handleClick}
+    >
       {renderError ? (
         <div className="text-center">
           <div className="text-4xl mb-2 text-red-500">⚠️</div>
@@ -173,7 +198,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           )}
           <canvas
             ref={canvasRef}
-            className="max-w-full max-h-full shadow-lg border border-gray-200 dark:border-gray-600 bg-white"
+            className="max-w-full max-h-full shadow-lg border border-gray-200 dark:border-gray-600 bg-white pointer-events-none"
           />
         </div>
       )}
