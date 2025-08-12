@@ -5,17 +5,22 @@ import { FooterBar } from './FooterBar';
 interface OverlayUIProps {
   currentPage: number;
   totalPages: number;
+  onFileSelect: (file: File) => void;
+  onVisibilityChange?: (isVisible: boolean) => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
   currentPage, 
-  totalPages 
+  totalPages,
+  onFileSelect,
+  onVisibilityChange
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const showUI = useCallback(() => {
     setIsVisible(true);
+    onVisibilityChange?.(true);
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -23,8 +28,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
     
     timeoutRef.current = setTimeout(() => {
       setIsVisible(false);
+      onVisibilityChange?.(false);
     }, 3000);
-  }, []);
+  }, [onVisibilityChange]);
 
   useEffect(() => {
     const handleMouseMove = () => showUI();
@@ -49,7 +55,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
 
   return (
     <>
-      <HeaderBar isVisible={isVisible} />
+      <HeaderBar isVisible={isVisible} onFileSelect={onFileSelect} />
       <FooterBar 
         isVisible={isVisible} 
         currentPage={currentPage} 

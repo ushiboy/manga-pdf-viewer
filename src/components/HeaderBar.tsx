@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from './ui/Button';
 
 interface HeaderBarProps {
   isVisible: boolean;
+  onFileSelect: (file: File) => void;
 }
 
-export const HeaderBar: React.FC<HeaderBarProps> = ({ isVisible }) => {
+export const HeaderBar: React.FC<HeaderBarProps> = ({ isVisible, onFileSelect }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+    }
+  };
+
   return (
     <div
       className={`absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300 ${
@@ -14,9 +28,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ isVisible }) => {
     >
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-2">
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" onClick={handleFileButtonClick}>
             📁 ファイル選択
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
         
         <div className="flex items-center space-x-2">
