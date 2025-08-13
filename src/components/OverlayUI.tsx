@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HeaderBar } from './HeaderBar';
 import { FooterBar } from './FooterBar';
+import type { ViewMode, ReadingDirection } from '../types/settings';
 
 interface OverlayUIProps {
   currentPage: number;
@@ -8,6 +9,10 @@ interface OverlayUIProps {
   onFileSelect: (file: File) => void;
   onVisibilityChange?: (isVisible: boolean) => void;
   onPageChange: (page: number) => void;
+  viewMode: ViewMode;
+  readingDirection: ReadingDirection;
+  onToggleViewMode: () => void;
+  onToggleReadingDirection: () => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
@@ -15,7 +20,11 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   totalPages,
   onFileSelect,
   onVisibilityChange,
-  onPageChange
+  onPageChange,
+  viewMode,
+  readingDirection,
+  onToggleViewMode,
+  onToggleReadingDirection
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,7 +66,14 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
 
   return (
     <>
-      <HeaderBar isVisible={isVisible} onFileSelect={onFileSelect} />
+      <HeaderBar 
+        isVisible={isVisible} 
+        onFileSelect={onFileSelect}
+        viewMode={viewMode}
+        readingDirection={readingDirection}
+        onToggleViewMode={onToggleViewMode}
+        onToggleReadingDirection={onToggleReadingDirection}
+      />
       <FooterBar 
         isVisible={isVisible} 
         currentPage={currentPage} 
