@@ -82,6 +82,7 @@ const App: React.FC = () => {
     onPreviousPage: goToPreviousPage,
     onNextPage: goToNextPage,
     enabled: loadState.isLoaded,
+    readingDirection: settings.readingDirection,
   });
 
   return (

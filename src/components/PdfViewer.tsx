@@ -292,20 +292,46 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
     if (viewMode === 'single') {
       if (clickX < centerX) {
-        // 左半分クリック：前のページ
-        if (currentPage > 1) {
-          onPageChange(currentPage - 1);
+        // 左半分クリック：RTLなら次のページ、LTRなら前のページ
+        if (readingDirection === 'rtl') {
+          if (currentPage < pdfDocument.numPages) {
+            onPageChange(currentPage + 1);
+          }
+        } else {
+          if (currentPage > 1) {
+            onPageChange(currentPage - 1);
+          }
         }
       } else {
-        // 右半分クリック：次のページ
-        if (currentPage < pdfDocument.numPages) {
-          onPageChange(currentPage + 1);
+        // 右半分クリック：RTLなら前のページ、LTRなら次のページ
+        if (readingDirection === 'rtl') {
+          if (currentPage > 1) {
+            onPageChange(currentPage - 1);
+          }
+        } else {
+          if (currentPage < pdfDocument.numPages) {
+            onPageChange(currentPage + 1);
+          }
         }
       }
     } else {
-      // 見開き表示時のページナビゲーション
-      if (clickX < centerX) {
-        // 左半分クリック：前の見開き
+      // 見開き表示時のページナビゲーション（読み方向に応じてクリック操作を調整）
+      const shouldGoNext = (readingDirection === 'rtl' && clickX < centerX) || 
+                          (readingDirection === 'ltr' && clickX >= centerX);
+      
+      if (shouldGoNext) {
+        // 次の見開きに進む
+        let nextPage;
+        if (currentPage === 1) {
+          // 表紙から2ページ目に移動
+          nextPage = 2;
+        } else {
+          // 通常の見開きナビゲーション
+          nextPage = Math.min(pdfDocument.numPages, currentPage + 2);
+        }
+        onPageChange(nextPage);
+      } else {
+        // 前の見開きに戻る
         let prevPage;
         if (currentPage === 1) {
           // 表紙は動かない
@@ -318,17 +344,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           prevPage = Math.max(2, currentPage - 2);
         }
         onPageChange(prevPage);
-      } else {
-        // 右半分クリック：次の見開き
-        let nextPage;
-        if (currentPage === 1) {
-          // 表紙から2ページ目に移動
-          nextPage = 2;
-        } else {
-          // 通常の見開きナビゲーション
-          nextPage = Math.min(pdfDocument.numPages, currentPage + 2);
-        }
-        onPageChange(nextPage);
       }
     }
   };

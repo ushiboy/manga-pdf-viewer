@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
+import type { ReadingDirection } from '../types/settings';
 
 interface UseKeyboardProps {
   onPreviousPage: () => void;
   onNextPage: () => void;
   onFullscreen?: () => void;
   enabled?: boolean;
+  readingDirection: ReadingDirection;
 }
 
 export const useKeyboard = ({
@@ -12,6 +14,7 @@ export const useKeyboard = ({
   onNextPage,
   onFullscreen,
   enabled = true,
+  readingDirection,
 }: UseKeyboardProps) => {
   useEffect(() => {
     if (!enabled) return;
@@ -27,12 +30,22 @@ export const useKeyboard = ({
         case 'ArrowLeft':
         case 'Left':
           event.preventDefault();
-          onPreviousPage();
+          // RTL（右→左読み）の場合は左キーで次のページ、LTR（左→右読み）の場合は前のページ
+          if (readingDirection === 'rtl') {
+            onNextPage();
+          } else {
+            onPreviousPage();
+          }
           break;
         case 'ArrowRight':
         case 'Right':
           event.preventDefault();
-          onNextPage();
+          // RTL（右→左読み）の場合は右キーで前のページ、LTR（左→右読み）の場合は次のページ
+          if (readingDirection === 'rtl') {
+            onPreviousPage();
+          } else {
+            onNextPage();
+          }
           break;
         case 'F11':
           if (onFullscreen) {
@@ -50,5 +63,5 @@ export const useKeyboard = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onPreviousPage, onNextPage, onFullscreen, enabled]);
+  }, [onPreviousPage, onNextPage, onFullscreen, enabled, readingDirection]);
 };
