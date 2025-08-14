@@ -7,6 +7,8 @@ interface UseKeyboardProps {
   onFullscreen?: () => void;
   enabled?: boolean;
   readingDirection: ReadingDirection;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
 }
 
 export const useKeyboard = ({
@@ -15,6 +17,8 @@ export const useKeyboard = ({
   onFullscreen,
   enabled = true,
   readingDirection,
+  onZoomIn,
+  onZoomOut,
 }: UseKeyboardProps) => {
   useEffect(() => {
     if (!enabled) return;
@@ -53,6 +57,20 @@ export const useKeyboard = ({
             onFullscreen();
           }
           break;
+        case '+':
+        case '=':
+          if (onZoomIn) {
+            event.preventDefault();
+            onZoomIn();
+          }
+          break;
+        case '-':
+        case '_':
+          if (onZoomOut) {
+            event.preventDefault();
+            onZoomOut();
+          }
+          break;
         default:
           break;
       }
@@ -63,5 +81,5 @@ export const useKeyboard = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onPreviousPage, onNextPage, onFullscreen, enabled, readingDirection]);
+  }, [onPreviousPage, onNextPage, onFullscreen, enabled, readingDirection, onZoomIn, onZoomOut]);
 };

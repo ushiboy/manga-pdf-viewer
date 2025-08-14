@@ -4,12 +4,14 @@ import { OverlayUI } from './components/OverlayUI';
 import { usePdfDocument } from './hooks/usePdfDocument';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useSettings } from './hooks/useSettings';
+import { useZoom } from './hooks/useZoom';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIVisible, setIsUIVisible] = useState(true);
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
   const { settings, toggleViewMode, toggleReadingDirection } = useSettings();
+  const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale } = useZoom();
 
   const handleFileSelect = useCallback((file: File) => {
     loadPdf(file);
@@ -83,6 +85,8 @@ const App: React.FC = () => {
     onNextPage: goToNextPage,
     enabled: loadState.isLoaded,
     readingDirection: settings.readingDirection,
+    onZoomIn: zoomIn,
+    onZoomOut: zoomOut,
   });
 
   return (
@@ -94,7 +98,11 @@ const App: React.FC = () => {
         isUIVisible={isUIVisible}
         viewMode={settings.viewMode}
         readingDirection={settings.readingDirection}
+        zoomState={zoomState}
+        calculateFitScale={calculateFitScale}
         onPageChange={handlePageChange}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
       />
       
       <OverlayUI 
@@ -107,6 +115,9 @@ const App: React.FC = () => {
         readingDirection={settings.readingDirection}
         onToggleViewMode={toggleViewMode}
         onToggleReadingDirection={toggleReadingDirection}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onToggleFitMode={cycleFitMode}
       />
       
       {!loadState.isLoaded && (

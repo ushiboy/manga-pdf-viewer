@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoadingSpinner } from './ui/LoadingSpinner';
 import type { PdfDocument, PdfLoadState } from '../types/pdf';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../types/settings';
 
 interface PdfViewerProps {
   pdfDocument: PdfDocument | null;
@@ -10,7 +10,17 @@ interface PdfViewerProps {
   isUIVisible: boolean;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
+  zoomState?: ZoomState;
+  calculateFitScale?: (
+    pageWidth: number,
+    pageHeight: number,
+    containerWidth: number,
+    containerHeight: number,
+    fitMode: FitMode
+  ) => number;
   onPageChange?: (page: number) => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
 }
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({ 
@@ -20,7 +30,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   isUIVisible,
   viewMode,
   readingDirection,
-  onPageChange
+  zoomState,
+  calculateFitScale,
+  onPageChange,
+  onZoomIn,
+  onZoomOut
 }) => {
   const leftCanvasRef = useRef<HTMLCanvasElement>(null);
   const rightCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,14 +78,30 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const uiHeight = isUIVisible ? 120 : 16;
       const containerHeight = window.innerHeight - uiHeight;
       
-      // ページがコンテナに収まるスケールを計算
-      const scaleX = containerWidth / baseViewport.width;
-      const scaleY = containerHeight / baseViewport.height;
-      const fitScale = Math.min(scaleX, scaleY, 3);
+      // ズーム状態に応じたスケールを計算
+      let finalScale;
+      if (zoomState && calculateFitScale) {
+        if (zoomState.fitMode === 'custom') {
+          finalScale = zoomState.scale;
+        } else {
+          finalScale = calculateFitScale(
+            baseViewport.width,
+            baseViewport.height,
+            containerWidth,
+            containerHeight,
+            zoomState.fitMode
+          );
+        }
+      } else {
+        // フォールバック（従来の自動フィット）
+        const scaleX = containerWidth / baseViewport.width;
+        const scaleY = containerHeight / baseViewport.height;
+        finalScale = Math.min(scaleX, scaleY, 3);
+      }
       
       // デバイスピクセル比を考慮した実際のスケール
       const devicePixelRatio = window.devicePixelRatio || 1;
-      const renderScale = fitScale * devicePixelRatio;
+      const renderScale = finalScale * devicePixelRatio;
       
       const viewport = page.getViewport({ scale: renderScale });
       
@@ -134,12 +164,29 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         const leftContext = leftCanvas.getContext('2d');
         if (leftContext) {
           const baseViewport = leftPage.getViewport({ scale: 1 });
-          const scaleX = pageContainerWidth / baseViewport.width;
-          const scaleY = containerHeight / baseViewport.height;
-          const fitScale = Math.min(scaleX, scaleY, 3);
+          
+          // ズーム状態に応じたスケールを計算（見開きページ用）
+          let finalScale;
+          if (zoomState && calculateFitScale) {
+            if (zoomState.fitMode === 'custom') {
+              finalScale = zoomState.scale;
+            } else {
+              finalScale = calculateFitScale(
+                baseViewport.width,
+                baseViewport.height,
+                pageContainerWidth,
+                containerHeight,
+                zoomState.fitMode
+              );
+            }
+          } else {
+            const scaleX = pageContainerWidth / baseViewport.width;
+            const scaleY = containerHeight / baseViewport.height;
+            finalScale = Math.min(scaleX, scaleY, 3);
+          }
           
           const devicePixelRatio = window.devicePixelRatio || 1;
-          const renderScale = fitScale * devicePixelRatio;
+          const renderScale = finalScale * devicePixelRatio;
           const viewport = leftPage.getViewport({ scale: renderScale });
           
           leftCanvas.width = viewport.width;
@@ -171,12 +218,29 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         const rightContext = rightCanvas.getContext('2d');
         if (rightContext) {
           const baseViewport = rightPage.getViewport({ scale: 1 });
-          const scaleX = pageContainerWidth / baseViewport.width;
-          const scaleY = containerHeight / baseViewport.height;
-          const fitScale = Math.min(scaleX, scaleY, 3);
+          
+          // ズーム状態に応じたスケールを計算（見開きページ用）
+          let finalScale;
+          if (zoomState && calculateFitScale) {
+            if (zoomState.fitMode === 'custom') {
+              finalScale = zoomState.scale;
+            } else {
+              finalScale = calculateFitScale(
+                baseViewport.width,
+                baseViewport.height,
+                pageContainerWidth,
+                containerHeight,
+                zoomState.fitMode
+              );
+            }
+          } else {
+            const scaleX = pageContainerWidth / baseViewport.width;
+            const scaleY = containerHeight / baseViewport.height;
+            finalScale = Math.min(scaleX, scaleY, 3);
+          }
           
           const devicePixelRatio = window.devicePixelRatio || 1;
-          const renderScale = fitScale * devicePixelRatio;
+          const renderScale = finalScale * devicePixelRatio;
           const viewport = rightPage.getViewport({ scale: renderScale });
           
           rightCanvas.width = viewport.width;
@@ -216,7 +280,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [pdfDocument, currentPage, isUIVisible, viewMode, readingDirection]);
+  }, [pdfDocument, currentPage, isUIVisible, viewMode, readingDirection, zoomState, calculateFitScale]);
 
   // ローディング状態
   if (loadState.isLoading) {
@@ -282,6 +346,21 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       </div>
     );
   }
+
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    
+    // ズーム機能が利用可能な場合のみ処理
+    if (onZoomIn && onZoomOut) {
+      if (event.deltaY < 0) {
+        // ホイール上回転：ズームイン
+        onZoomIn();
+      } else {
+        // ホイール下回転：ズームアウト
+        onZoomOut();
+      }
+    }
+  };
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!onPageChange || !pdfDocument) return;
@@ -353,6 +432,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     <div 
       className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden cursor-pointer"
       onClick={handleClick}
+      onWheel={handleWheel}
     >
       {renderError ? (
         <div className="text-center">

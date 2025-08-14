@@ -6,13 +6,19 @@ interface FooterBarProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onToggleFitMode?: () => void;
 }
 
 export const FooterBar: React.FC<FooterBarProps> = ({ 
   isVisible, 
   currentPage, 
   totalPages,
-  onPageChange
+  onPageChange,
+  onZoomIn,
+  onZoomOut,
+  onToggleFitMode
 }) => {
   const [inputValue, setInputValue] = useState(currentPage.toString());
 
@@ -64,13 +70,31 @@ export const FooterBar: React.FC<FooterBarProps> = ({
     >
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" title="ズームアウト">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="ズームアウト"
+            onClick={onZoomOut}
+            disabled={!onZoomOut}
+          >
             ➖
           </Button>
-          <Button variant="ghost" size="sm" title="ズームイン">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="ズームイン"
+            onClick={onZoomIn}
+            disabled={!onZoomIn}
+          >
             ➕
           </Button>
-          <Button variant="ghost" size="sm" title="フィット表示">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="フィット表示"
+            onClick={onToggleFitMode}
+            disabled={!onToggleFitMode}
+          >
             🔍
           </Button>
         </div>

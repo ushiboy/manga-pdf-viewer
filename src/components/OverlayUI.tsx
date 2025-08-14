@@ -13,6 +13,9 @@ interface OverlayUIProps {
   readingDirection: ReadingDirection;
   onToggleViewMode: () => void;
   onToggleReadingDirection: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onToggleFitMode?: () => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
@@ -24,7 +27,10 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   viewMode,
   readingDirection,
   onToggleViewMode,
-  onToggleReadingDirection
+  onToggleReadingDirection,
+  onZoomIn,
+  onZoomOut,
+  onToggleFitMode
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,6 +85,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         currentPage={currentPage} 
         totalPages={totalPages}
         onPageChange={onPageChange}
+        onZoomIn={onZoomIn}
+        onZoomOut={onZoomOut}
+        onToggleFitMode={onToggleFitMode}
       />
     </>
   );
