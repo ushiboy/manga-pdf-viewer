@@ -40,11 +40,33 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const rightCanvasRef = useRef<HTMLCanvasElement>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
+  
+  // レンダリングタスクを管理するref
+  const renderTasksRef = useRef<{
+    left?: any;
+    right?: any;
+    single?: any;
+  }>({});
 
   useEffect(() => {
     if (!pdfDocument) return;
 
     const renderPages = async () => {
+      // 既存のレンダリングタスクをキャンセル
+      const tasks = renderTasksRef.current;
+      if (tasks.single) {
+        tasks.single.cancel();
+        tasks.single = undefined;
+      }
+      if (tasks.left) {
+        tasks.left.cancel();
+        tasks.left = undefined;
+      }
+      if (tasks.right) {
+        tasks.right.cancel();
+        tasks.right = undefined;
+      }
+
       setIsRendering(true);
       setRenderError(null);
 
@@ -55,8 +77,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           await renderSpreadPages();
         }
       } catch (error) {
-        console.error('PDF レンダリングエラー:', error);
-        setRenderError('ページの表示に失敗しました');
+        // キャンセルエラーは無視
+        if (error.name !== 'RenderingCancelledException') {
+          console.error('PDF レンダリングエラー:', error);
+          setRenderError('ページの表示に失敗しました');
+        }
       } finally {
         setIsRendering(false);
       }
@@ -119,7 +144,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         viewport: viewport,
       };
 
-      await page.render(renderContext).promise;
+      // レンダリングタスクを保存して実行
+      const renderTask = page.render(renderContext);
+      renderTasksRef.current.single = renderTask;
+      await renderTask.promise;
 
       // 右側のキャンバスを非表示
       if (rightCanvasRef.current) {
@@ -194,10 +222,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           leftCanvas.style.width = `${viewport.width / devicePixelRatio}px`;
           leftCanvas.style.height = `${viewport.height / devicePixelRatio}px`;
 
-          await leftPage.render({
+          // レンダリングタスクを保存して実行
+          const leftRenderTask = leftPage.render({
             canvasContext: leftContext,
             viewport: viewport,
-          }).promise;
+          });
+          renderTasksRef.current.left = leftRenderTask;
+          await leftRenderTask.promise;
         }
       } else {
         // 左ページが存在しない場合は空白
@@ -248,10 +279,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           rightCanvas.style.width = `${viewport.width / devicePixelRatio}px`;
           rightCanvas.style.height = `${viewport.height / devicePixelRatio}px`;
 
-          await rightPage.render({
+          // レンダリングタスクを保存して実行
+          const rightRenderTask = rightPage.render({
             canvasContext: rightContext,
             viewport: viewport,
-          }).promise;
+          });
+          renderTasksRef.current.right = rightRenderTask;
+          await rightRenderTask.promise;
         }
       } else {
         // 右ページが存在しない場合は空白
@@ -278,6 +312,21 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     window.addEventListener('resize', handleResize);
 
     return () => {
+      // クリーンアップ時に実行中のレンダリングタスクをキャンセル
+      const tasks = renderTasksRef.current;
+      if (tasks.single) {
+        tasks.single.cancel();
+        tasks.single = undefined;
+      }
+      if (tasks.left) {
+        tasks.left.cancel();
+        tasks.left = undefined;
+      }
+      if (tasks.right) {
+        tasks.right.cancel();
+        tasks.right = undefined;
+      }
+      
       window.removeEventListener('resize', handleResize);
     };
   }, [pdfDocument, currentPage, isUIVisible, viewMode, readingDirection, zoomState, calculateFitScale]);
