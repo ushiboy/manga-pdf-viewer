@@ -52,7 +52,13 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   useEffect(() => {
     const handleMouseMove = () => showUI();
     const handleTouch = () => showUI();
-    const handleKeyDown = () => showUI();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // ページ移動キーとズームキーでは UI を再表示しない
+      const pageNavigationKeys = ['ArrowLeft', 'ArrowRight', 'Left', 'Right', '+', '=', '-', '_'];
+      if (!pageNavigationKeys.includes(event.key)) {
+        showUI();
+      }
+    };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('touchstart', handleTouch);
