@@ -176,7 +176,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const containerHeight = window.innerHeight - uiHeight;
 
       // 見開き用のサイズ計算（コンテナ幅を2分割）
-      const pageContainerWidth = containerWidth / 2 - 8; // 左右のマージン
+      const pageContainerWidth = containerWidth / 2;
 
       // 現在ページと次のページを取得（1ページ目を除く）
       const leftPageNum = readingDirection === 'rtl' ? currentPage + 1 : currentPage;
@@ -489,7 +489,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           <p className="text-red-600 dark:text-red-400">{renderError}</p>
         </div>
       ) : (
-        <div className={`relative ${viewMode === 'spread' ? 'flex gap-2' : ''}`}>
+        <div className={`relative ${viewMode === 'spread' ? 'flex' : ''}`}>
           {isRendering && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 z-10">
               <LoadingSpinner size="md" />
