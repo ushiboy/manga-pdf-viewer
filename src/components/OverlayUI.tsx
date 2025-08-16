@@ -94,6 +94,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         isVisible={isVisible} 
         currentPage={currentPage} 
         totalPages={totalPages}
+        viewMode={viewMode}
         onPageChange={onPageChange}
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}

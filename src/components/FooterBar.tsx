@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
+import type { ViewMode } from '../types/settings';
 
 interface FooterBarProps {
   isVisible: boolean;
   currentPage: number;
   totalPages: number;
+  viewMode: ViewMode;
   onPageChange: (page: number) => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
@@ -17,6 +19,7 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   isVisible, 
   currentPage, 
   totalPages,
+  viewMode,
   onPageChange,
   onZoomIn,
   onZoomOut,
@@ -66,6 +69,15 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   React.useEffect(() => {
     setInputValue(currentPage.toString());
   }, [currentPage]);
+
+  // 見開き表示を考慮したボタン無効化ロジック
+  const isAtLastPage = viewMode === 'single' 
+    ? currentPage >= totalPages
+    : (currentPage === 1 ? false : currentPage + 2 > totalPages);
+  
+  const isAtLastSpread = viewMode === 'spread' && totalPages > 2 
+    ? currentPage >= Math.max(2, totalPages - 1)
+    : currentPage >= totalPages;
   return (
     <div
       className={`absolute bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
@@ -144,7 +156,7 @@ export const FooterBar: React.FC<FooterBarProps> = ({
             size="sm" 
             title="次のページ"
             onClick={goToNextPage}
-            disabled={currentPage >= totalPages}
+            disabled={isAtLastPage}
           >
             ➡️
           </Button>
@@ -153,7 +165,7 @@ export const FooterBar: React.FC<FooterBarProps> = ({
             size="sm" 
             title="末尾ページ"
             onClick={onGoToLast}
-            disabled={currentPage >= totalPages || !onGoToLast}
+            disabled={isAtLastSpread || !onGoToLast}
           >
             ⏭️
           </Button>

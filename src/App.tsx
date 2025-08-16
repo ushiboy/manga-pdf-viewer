@@ -63,6 +63,8 @@ const App: React.FC = () => {
   }, [handlePageChange, currentPage, settings.viewMode]);
 
   const goToNextPage = useCallback(() => {
+    if (!pdfDocument) return;
+    
     if (settings.viewMode === 'single') {
       handlePageChange(currentPage + 1);
     } else {
@@ -73,11 +75,18 @@ const App: React.FC = () => {
         nextPage = 2;
       } else {
         // 通常の見開きナビゲーション
-        nextPage = currentPage + 2;
+        const potentialNextPage = currentPage + 2;
+        // 見開きで次のページが存在するかチェック
+        if (potentialNextPage <= pdfDocument.numPages) {
+          nextPage = potentialNextPage;
+        } else {
+          // 次のページが存在しない場合は移動しない
+          return;
+        }
       }
       handlePageChange(nextPage);
     }
-  }, [handlePageChange, currentPage, settings.viewMode]);
+  }, [handlePageChange, currentPage, settings.viewMode, pdfDocument]);
 
   const goToFirstPage = useCallback(() => {
     handlePageChange(1);
@@ -85,8 +94,27 @@ const App: React.FC = () => {
 
   const goToLastPage = useCallback(() => {
     if (!pdfDocument) return;
-    handlePageChange(pdfDocument.numPages);
-  }, [handlePageChange, pdfDocument]);
+    
+    if (settings.viewMode === 'single') {
+      handlePageChange(pdfDocument.numPages);
+    } else {
+      // 見開き表示時の最終ページ処理
+      const totalPages = pdfDocument.numPages;
+      let lastSpreadPage;
+      
+      if (totalPages <= 2) {
+        // ページ数が少ない場合は最終ページ
+        lastSpreadPage = totalPages;
+      } else {
+        // 見開きで最終ページを表示するための開始ページを計算
+        // 最終ページが偶数の場合：totalPages - 1
+        // 最終ページが奇数の場合：totalPages - 1（ただし最小2）
+        lastSpreadPage = Math.max(2, totalPages - 1);
+      }
+      
+      handlePageChange(lastSpreadPage);
+    }
+  }, [handlePageChange, pdfDocument, settings.viewMode]);
 
   // キーボードショートカット
   useKeyboard({
