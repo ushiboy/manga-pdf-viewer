@@ -18,6 +18,8 @@ interface OverlayUIProps {
   onToggleFitMode?: () => void;
   onGoToFirst?: () => void;
   onGoToLast?: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
@@ -34,7 +36,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   onZoomOut,
   onToggleFitMode,
   onGoToFirst,
-  onGoToLast
+  onGoToLast,
+  isFullscreen = false,
+  onToggleFullscreen
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,11 +51,14 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
       clearTimeout(timeoutRef.current);
     }
     
+    // フルスクリーン時は UI の自動非表示を早くする
+    const hideDelay = isFullscreen ? 2000 : 3000;
+    
     timeoutRef.current = setTimeout(() => {
       setIsVisible(false);
       onVisibilityChange?.(false);
-    }, 3000);
-  }, [onVisibilityChange]);
+    }, hideDelay);
+  }, [onVisibilityChange, isFullscreen]);
 
   useEffect(() => {
     const handleMouseMove = () => showUI();
@@ -89,6 +96,8 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         readingDirection={readingDirection}
         onToggleViewMode={onToggleViewMode}
         onToggleReadingDirection={onToggleReadingDirection}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
       />
       <FooterBar 
         isVisible={isVisible} 

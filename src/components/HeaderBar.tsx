@@ -9,6 +9,8 @@ interface HeaderBarProps {
   readingDirection: ReadingDirection;
   onToggleViewMode: () => void;
   onToggleReadingDirection: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({ 
@@ -17,7 +19,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   viewMode,
   readingDirection,
   onToggleViewMode,
-  onToggleReadingDirection
+  onToggleReadingDirection,
+  isFullscreen = false,
+  onToggleFullscreen
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,8 +73,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           >
             {readingDirection === 'rtl' ? '⬅️' : '➡️'}
           </Button>
-          <Button variant="ghost" size="sm" title="フルスクリーン">
-            ⛶
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title={isFullscreen ? "フルスクリーン終了 (F11)" : "フルスクリーン (F11)"}
+            onClick={onToggleFullscreen}
+          >
+            {isFullscreen ? '🗗' : '⛶'}
           </Button>
           <Button variant="ghost" size="sm" title="設定">
             ⚙️

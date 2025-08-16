@@ -5,6 +5,7 @@ import { usePdfDocument } from './hooks/usePdfDocument';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useSettings } from './hooks/useSettings';
 import { useZoom } from './hooks/useZoom';
+import { useFullscreen } from './hooks/useFullscreen';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,6 +13,7 @@ const App: React.FC = () => {
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
   const { settings, toggleViewMode, toggleReadingDirection } = useSettings();
   const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale, setOffset } = useZoom();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
   
   // ズーム関数をラップして現在の表示スケールを渡す
   const handleZoomIn = useCallback(() => zoomIn(), [zoomIn]);
@@ -132,6 +134,7 @@ const App: React.FC = () => {
     readingDirection: settings.readingDirection,
     onZoomIn: handleZoomIn,
     onZoomOut: handleZoomOut,
+    onFullscreen: toggleFullscreen,
   });
 
   return (
@@ -166,6 +169,8 @@ const App: React.FC = () => {
         onToggleFitMode={cycleFitMode}
         onGoToFirst={goToFirstPage}
         onGoToLast={goToLastPage}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
       />
       
       {!loadState.isLoaded && (
