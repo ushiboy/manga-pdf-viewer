@@ -54,7 +54,7 @@ export const usePdfDocument = () => {
       });
 
       // 進行状況を監視
-      loadingTask.onProgress = (progressData) => {
+      loadingTask.onProgress = (progressData: any) => {
         if (progressData.total > 0) {
           const progress = Math.min(90, (progressData.loaded / progressData.total) * 90);
           setLoadState(prev => ({ ...prev, progress }));
@@ -69,7 +69,7 @@ export const usePdfDocument = () => {
 
       // メタデータを取得（オプション）
       const metadata = await pdf.getMetadata().catch(() => null);
-      const title = metadata?.info?.Title || file.name;
+      const title = (metadata?.info as any)?.Title || file.name;
 
       const pdfDoc: PdfDocument = {
         document: pdf,

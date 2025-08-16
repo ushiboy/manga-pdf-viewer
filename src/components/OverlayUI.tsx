@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React from 'react';
 import { HeaderBar } from './HeaderBar';
 import { FooterBar } from './FooterBar';
+import { FloatingShowButton } from './FloatingShowButton';
 import type { ViewMode, ReadingDirection } from '../types/settings';
 
 interface OverlayUIProps {
   currentPage: number;
   totalPages: number;
+  isVisible: boolean;
   onFileSelect: (file: File) => void;
-  onVisibilityChange?: (isVisible: boolean) => void;
+  onShow: () => void;
+  onHide: () => void;
   onPageChange: (page: number) => void;
   onPreviousPage?: () => void;
   onNextPage?: () => void;
@@ -27,8 +30,10 @@ interface OverlayUIProps {
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
   currentPage, 
   totalPages,
+  isVisible,
   onFileSelect,
-  onVisibilityChange,
+  onShow,
+  onHide,
   onPageChange,
   onPreviousPage,
   onNextPage,
@@ -44,58 +49,16 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   isFullscreen = false,
   onToggleFullscreen
 }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const showUI = useCallback(() => {
-    setIsVisible(true);
-    onVisibilityChange?.(true);
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // フルスクリーン時は UI の自動非表示を早くする
-    const hideDelay = isFullscreen ? 2000 : 3000;
-    
-    timeoutRef.current = setTimeout(() => {
-      setIsVisible(false);
-      onVisibilityChange?.(false);
-    }, hideDelay);
-  }, [onVisibilityChange, isFullscreen]);
-
-  useEffect(() => {
-    const handleMouseMove = () => showUI();
-    const handleTouch = () => showUI();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // ページ移動キーとズームキーでは UI を再表示しない
-      const pageNavigationKeys = ['ArrowLeft', 'ArrowRight', 'Left', 'Right', '+', '=', '-', '_'];
-      if (!pageNavigationKeys.includes(event.key)) {
-        showUI();
-      }
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('touchstart', handleTouch);
-    document.addEventListener('keydown', handleKeyDown);
-
-    showUI();
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('touchstart', handleTouch);
-      document.removeEventListener('keydown', handleKeyDown);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [showUI]);
-
   return (
     <>
+      <FloatingShowButton 
+        isVisible={isVisible}
+        onShow={onShow}
+      />
       <HeaderBar 
         isVisible={isVisible} 
         onFileSelect={onFileSelect}
+        onHide={onHide}
         viewMode={viewMode}
         readingDirection={readingDirection}
         onToggleViewMode={onToggleViewMode}

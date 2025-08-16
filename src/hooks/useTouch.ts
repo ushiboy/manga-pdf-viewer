@@ -38,7 +38,7 @@ export const useTouch = ({
   const lastPanPositionRef = useRef<TouchPoint>({ x: 0, y: 0 });
 
   // 2点間の距離を計算
-  const getDistance = useCallback((touch1: Touch, touch2: Touch): number => {
+  const getDistance = useCallback((touch1: React.Touch, touch2: React.Touch): number => {
     const dx = touch1.clientX - touch2.clientX;
     const dy = touch1.clientY - touch2.clientY;
     return Math.sqrt(dx * dx + dy * dy);

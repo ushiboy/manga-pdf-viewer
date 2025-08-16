@@ -5,6 +5,7 @@ import type { ViewMode, ReadingDirection } from '../types/settings';
 interface HeaderBarProps {
   isVisible: boolean;
   onFileSelect: (file: File) => void;
+  onHide: () => void;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
   onToggleViewMode: () => void;
@@ -16,6 +17,7 @@ interface HeaderBarProps {
 export const HeaderBar: React.FC<HeaderBarProps> = ({ 
   isVisible, 
   onFileSelect,
+  onHide,
   viewMode,
   readingDirection,
   onToggleViewMode,
@@ -44,6 +46,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
     >
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onHide}
+            title="UI非表示"
+            className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            ✕
+          </Button>
           <Button variant="secondary" size="sm" onClick={handleFileButtonClick}>
             📁 ファイル選択
           </Button>

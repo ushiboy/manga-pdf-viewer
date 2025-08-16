@@ -114,7 +114,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         }
       } catch (error) {
         // キャンセルエラーは無視
-        if (error.name !== 'RenderingCancelledException') {
+        if (error instanceof Error && error.name !== 'RenderingCancelledException') {
           console.error('PDF レンダリングエラー:', error);
           setRenderError('ページの表示に失敗しました');
         }

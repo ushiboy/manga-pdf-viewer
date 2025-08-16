@@ -126,6 +126,14 @@ const App: React.FC = () => {
     setOffset(offsetX, offsetY, containerWidth, containerHeight, pageWidth, pageHeight);
   }, [setOffset]);
 
+  const showUI = useCallback(() => {
+    setIsUIVisible(true);
+  }, []);
+
+  const hideUI = useCallback(() => {
+    setIsUIVisible(false);
+  }, []);
+
   // キーボードショートカット
   useKeyboard({
     onPreviousPage: goToPreviousPage,
@@ -159,8 +167,10 @@ const App: React.FC = () => {
       <OverlayUI 
         currentPage={currentPage}
         totalPages={pdfDocument?.numPages || 0}
+        isVisible={isUIVisible}
         onFileSelect={handleFileSelect}
-        onVisibilityChange={setIsUIVisible}
+        onShow={showUI}
+        onHide={hideUI}
         onPageChange={handlePageChange}
         onPreviousPage={goToPreviousPage}
         onNextPage={goToNextPage}
