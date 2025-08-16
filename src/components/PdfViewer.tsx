@@ -357,6 +357,47 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     };
   }, [pdfDocument, currentPage, isUIVisible, viewMode, readingDirection, zoomState, calculateFitScale]);
 
+  // グローバルマウスイベントのリスナー
+  React.useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        document.body.style.cursor = '';
+      }
+    };
+
+    const handleGlobalMouseMove = (event: MouseEvent) => {
+      if (isDragging && onPan && zoomState && pdfDocument) {
+        const deltaX = event.clientX - dragStart.x;
+        const deltaY = event.clientY - dragStart.y;
+        
+        const newOffsetX = lastPanPosition.x + deltaX;
+        const newOffsetY = lastPanPosition.y + deltaY;
+        
+        // コンテナサイズを計算
+        const containerWidth = window.innerWidth - 32;
+        const uiHeight = isUIVisible ? 120 : 16;
+        const containerHeight = window.innerHeight - uiHeight;
+        
+        // 現在のページのベースサイズを取得（概算）
+        const pageWidth = viewMode === 'spread' ? containerWidth / 2 : containerWidth;
+        const pageHeight = containerHeight;
+        
+        onPan(newOffsetX, newOffsetY, containerWidth, containerHeight, pageWidth, pageHeight);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart, lastPanPosition, onPan, zoomState, pdfDocument, viewMode, isUIVisible]);
+
   // ローディング状態
   if (loadState.isLoading) {
     return (
@@ -499,47 +540,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       document.body.style.cursor = '';
     }
   };
-
-  // グローバルマウスイベントのリスナー
-  React.useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        document.body.style.cursor = '';
-      }
-    };
-
-    const handleGlobalMouseMove = (event: MouseEvent) => {
-      if (isDragging && onPan && zoomState && pdfDocument) {
-        const deltaX = event.clientX - dragStart.x;
-        const deltaY = event.clientY - dragStart.y;
-        
-        const newOffsetX = lastPanPosition.x + deltaX;
-        const newOffsetY = lastPanPosition.y + deltaY;
-        
-        // コンテナサイズを計算
-        const containerWidth = window.innerWidth - 32;
-        const uiHeight = isUIVisible ? 120 : 16;
-        const containerHeight = window.innerHeight - uiHeight;
-        
-        // 現在のページのベースサイズを取得（概算）
-        const pageWidth = viewMode === 'spread' ? containerWidth / 2 : containerWidth;
-        const pageHeight = containerHeight;
-        
-        onPan(newOffsetX, newOffsetY, containerWidth, containerHeight, pageWidth, pageHeight);
-      }
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-    };
-  }, [isDragging, dragStart, lastPanPosition, onPan, zoomState]);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     // ドラッグ操作の場合はクリックイベントを無視
