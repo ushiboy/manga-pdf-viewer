@@ -54,6 +54,11 @@ export const useSettings = () => {
     setReadingDirection(settings.readingDirection === 'rtl' ? 'ltr' : 'rtl');
   }, [settings.readingDirection, setReadingDirection]);
 
+  const resetToDefaults = useCallback(() => {
+    setSettings(DEFAULT_SETTINGS);
+    saveSettings(DEFAULT_SETTINGS);
+  }, []);
+
   // 初期読み込み時に設定をlocalStorageから復元
   useEffect(() => {
     const initialSettings = loadSettings();
@@ -70,5 +75,6 @@ export const useSettings = () => {
     toggleViewMode,
     toggleReadingDirection,
     updateSettings,
+    resetToDefaults,
   };
 };

@@ -11,7 +11,7 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIVisible, setIsUIVisible] = useState(true);
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
-  const { settings, toggleViewMode, toggleReadingDirection } = useSettings();
+  const { settings, toggleViewMode, toggleReadingDirection, resetToDefaults } = useSettings();
   const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale, setOffset } = useZoom();
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   
@@ -178,6 +178,7 @@ const App: React.FC = () => {
         readingDirection={settings.readingDirection}
         onToggleViewMode={toggleViewMode}
         onToggleReadingDirection={toggleReadingDirection}
+        onResetSettings={resetToDefaults}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onToggleFitMode={cycleFitMode}

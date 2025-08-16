@@ -12,6 +12,7 @@ interface HeaderBarProps {
   onToggleReadingDirection: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  onOpenSettings: () => void;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({ 
@@ -23,7 +24,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onToggleViewMode,
   onToggleReadingDirection,
   isFullscreen = false,
-  onToggleFullscreen
+  onToggleFullscreen,
+  onOpenSettings
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,7 +94,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           >
             {isFullscreen ? '🗗' : '⛶'}
           </Button>
-          <Button variant="ghost" size="sm" title="設定">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="設定"
+            onClick={onOpenSettings}
+          >
             ⚙️
           </Button>
         </div>

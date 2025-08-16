@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HeaderBar } from './HeaderBar';
 import { FooterBar } from './FooterBar';
 import { FloatingShowButton } from './FloatingShowButton';
+import { SettingsPanel } from './SettingsPanel';
 import type { ViewMode, ReadingDirection } from '../types/settings';
 
 interface OverlayUIProps {
@@ -18,6 +19,7 @@ interface OverlayUIProps {
   readingDirection: ReadingDirection;
   onToggleViewMode: () => void;
   onToggleReadingDirection: () => void;
+  onResetSettings: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onToggleFitMode?: () => void;
@@ -41,6 +43,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   readingDirection,
   onToggleViewMode,
   onToggleReadingDirection,
+  onResetSettings,
   onZoomIn,
   onZoomOut,
   onToggleFitMode,
@@ -49,6 +52,16 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   isFullscreen = false,
   onToggleFullscreen
 }) => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+  };
+
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false);
+  };
+
   return (
     <>
       <FloatingShowButton 
@@ -65,6 +78,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         onToggleReadingDirection={onToggleReadingDirection}
         isFullscreen={isFullscreen}
         onToggleFullscreen={onToggleFullscreen}
+        onOpenSettings={handleOpenSettings}
       />
       <FooterBar 
         isVisible={isVisible} 
@@ -80,6 +94,15 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         onToggleFitMode={onToggleFitMode}
         onGoToFirst={onGoToFirst}
         onGoToLast={onGoToLast}
+      />
+      <SettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={handleCloseSettings}
+        viewMode={viewMode}
+        readingDirection={readingDirection}
+        onToggleViewMode={onToggleViewMode}
+        onToggleReadingDirection={onToggleReadingDirection}
+        onResetSettings={onResetSettings}
       />
     </>
   );
