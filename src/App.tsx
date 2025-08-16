@@ -11,7 +11,7 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIVisible, setIsUIVisible] = useState(true);
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
-  const { settings, toggleViewMode, toggleReadingDirection, resetToDefaults } = useSettings();
+  const { settings, toggleViewMode, toggleReadingDirection, toggleTreatFirstPageAsCover, resetToDefaults } = useSettings();
   const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale, setOffset } = useZoom();
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   
@@ -54,19 +54,25 @@ const App: React.FC = () => {
     } else {
       // 見開き表示時の前ページ処理
       let prevPage;
-      if (currentPage === 1) {
-        // 表紙は動かない
-        prevPage = 1;
-      } else if (currentPage === 2) {
-        // 2ページ目から表紙（1ページ目）に戻る
-        prevPage = 1;
+      if (settings.treatFirstPageAsCover) {
+        // 表紙モードON
+        if (currentPage === 1) {
+          // 表紙は動かない
+          prevPage = 1;
+        } else if (currentPage === 2) {
+          // 2ページ目から表紙（1ページ目）に戻る
+          prevPage = 1;
+        } else {
+          // 通常の見開きナビゲーション
+          prevPage = Math.max(2, currentPage - 2);
+        }
       } else {
-        // 通常の見開きナビゲーション
-        prevPage = Math.max(2, currentPage - 2);
+        // 表紙モードOFF：1ページ目から見開き
+        prevPage = Math.max(1, currentPage - 2);
       }
       handlePageChange(prevPage);
     }
-  }, [handlePageChange, currentPage, settings.viewMode]);
+  }, [handlePageChange, currentPage, settings.viewMode, settings.treatFirstPageAsCover]);
 
   const goToNextPage = useCallback(() => {
     if (!pdfDocument) return;
@@ -76,13 +82,25 @@ const App: React.FC = () => {
     } else {
       // 見開き表示時の次ページ処理
       let nextPage;
-      if (currentPage === 1) {
-        // 表紙から2ページ目に移動
-        nextPage = 2;
+      if (settings.treatFirstPageAsCover) {
+        // 表紙モードON
+        if (currentPage === 1) {
+          // 表紙から2ページ目に移動
+          nextPage = 2;
+        } else {
+          // 通常の見開きナビゲーション
+          const potentialNextPage = currentPage + 2;
+          // 見開きで次のページが存在するかチェック
+          if (potentialNextPage <= pdfDocument.numPages) {
+            nextPage = potentialNextPage;
+          } else {
+            // 次のページが存在しない場合は移動しない
+            return;
+          }
+        }
       } else {
-        // 通常の見開きナビゲーション
+        // 表紙モードOFF：1ページ目から見開き
         const potentialNextPage = currentPage + 2;
-        // 見開きで次のページが存在するかチェック
         if (potentialNextPage <= pdfDocument.numPages) {
           nextPage = potentialNextPage;
         } else {
@@ -92,7 +110,7 @@ const App: React.FC = () => {
       }
       handlePageChange(nextPage);
     }
-  }, [handlePageChange, currentPage, settings.viewMode, pdfDocument]);
+  }, [handlePageChange, currentPage, settings.viewMode, settings.treatFirstPageAsCover, pdfDocument]);
 
   const goToFirstPage = useCallback(() => {
     handlePageChange(1);
@@ -108,19 +126,28 @@ const App: React.FC = () => {
       const totalPages = pdfDocument.numPages;
       let lastSpreadPage;
       
-      if (totalPages <= 2) {
-        // ページ数が少ない場合は最終ページ
-        lastSpreadPage = totalPages;
+      if (settings.treatFirstPageAsCover) {
+        // 表紙モードON：1ページ目は単独、2ページ目以降見開き
+        if (totalPages <= 2) {
+          // ページ数が少ない場合は最終ページ
+          lastSpreadPage = totalPages;
+        } else {
+          // 見開きで最終ページを表示するための開始ページを計算
+          lastSpreadPage = Math.max(2, totalPages - 1);
+        }
       } else {
-        // 見開きで最終ページを表示するための開始ページを計算
-        // 最終ページが偶数の場合：totalPages - 1
-        // 最終ページが奇数の場合：totalPages - 1（ただし最小2）
-        lastSpreadPage = Math.max(2, totalPages - 1);
+        // 表紙モードOFF：1ページ目から見開き
+        if (totalPages <= 1) {
+          lastSpreadPage = 1;
+        } else {
+          // 最終見開きの開始ページを計算（奇数ページからスタート）
+          lastSpreadPage = totalPages % 2 === 1 ? totalPages : totalPages - 1;
+        }
       }
       
       handlePageChange(lastSpreadPage);
     }
-  }, [handlePageChange, pdfDocument, settings.viewMode]);
+  }, [handlePageChange, pdfDocument, settings.viewMode, settings.treatFirstPageAsCover]);
 
   const handlePan = useCallback((offsetX: number, offsetY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => {
     setOffset(offsetX, offsetY, containerWidth, containerHeight, pageWidth, pageHeight);
@@ -154,6 +181,7 @@ const App: React.FC = () => {
         isUIVisible={isUIVisible}
         viewMode={settings.viewMode}
         readingDirection={settings.readingDirection}
+        treatFirstPageAsCover={settings.treatFirstPageAsCover}
         zoomState={zoomState}
         calculateFitScale={calculateFitScale}
         onPageChange={handlePageChange}
@@ -176,8 +204,10 @@ const App: React.FC = () => {
         onNextPage={goToNextPage}
         viewMode={settings.viewMode}
         readingDirection={settings.readingDirection}
+        treatFirstPageAsCover={settings.treatFirstPageAsCover}
         onToggleViewMode={toggleViewMode}
         onToggleReadingDirection={toggleReadingDirection}
+        onToggleTreatFirstPageAsCover={toggleTreatFirstPageAsCover}
         onResetSettings={resetToDefaults}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}

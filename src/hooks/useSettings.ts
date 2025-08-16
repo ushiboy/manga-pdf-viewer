@@ -46,6 +46,10 @@ export const useSettings = () => {
     updateSettings({ theme });
   }, [updateSettings]);
 
+  const setTreatFirstPageAsCover = useCallback((treatFirstPageAsCover: boolean) => {
+    updateSettings({ treatFirstPageAsCover });
+  }, [updateSettings]);
+
   const toggleViewMode = useCallback(() => {
     setViewMode(settings.viewMode === 'single' ? 'spread' : 'single');
   }, [settings.viewMode, setViewMode]);
@@ -53,6 +57,10 @@ export const useSettings = () => {
   const toggleReadingDirection = useCallback(() => {
     setReadingDirection(settings.readingDirection === 'rtl' ? 'ltr' : 'rtl');
   }, [settings.readingDirection, setReadingDirection]);
+
+  const toggleTreatFirstPageAsCover = useCallback(() => {
+    setTreatFirstPageAsCover(!settings.treatFirstPageAsCover);
+  }, [settings.treatFirstPageAsCover, setTreatFirstPageAsCover]);
 
   const resetToDefaults = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
@@ -72,8 +80,10 @@ export const useSettings = () => {
     setViewMode,
     setReadingDirection,
     setTheme,
+    setTreatFirstPageAsCover,
     toggleViewMode,
     toggleReadingDirection,
+    toggleTreatFirstPageAsCover,
     updateSettings,
     resetToDefaults,
   };

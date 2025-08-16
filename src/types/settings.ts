@@ -8,6 +8,7 @@ export interface ViewSettings {
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
   theme: 'light' | 'dark' | 'system';
+  treatFirstPageAsCover: boolean;
 }
 
 export interface ZoomState {
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: ViewSettings = {
   viewMode: 'single',
   readingDirection: 'rtl',
   theme: 'system',
+  treatFirstPageAsCover: true,
 };
 
 export const DEFAULT_ZOOM_STATE: ZoomState = {

@@ -11,6 +11,7 @@ interface PdfViewerProps {
   isUIVisible: boolean;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
+  treatFirstPageAsCover: boolean;
   zoomState?: ZoomState;
   calculateFitScale?: (
     pageWidth: number,
@@ -34,6 +35,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   isUIVisible,
   viewMode,
   readingDirection,
+  treatFirstPageAsCover,
   zoomState,
   calculateFitScale,
   onPageChange,
@@ -203,8 +205,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const rightCanvas = rightCanvasRef.current;
       if (!leftCanvas || !rightCanvas) return;
 
-      // 1ページ目（表紙）は単一ページ表示
-      if (currentPage === 1) {
+      // 表紙モードが有効で1ページ目の場合は単一ページ表示
+      if (treatFirstPageAsCover && currentPage === 1) {
         await renderSinglePage();
         return;
       }
@@ -221,9 +223,26 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       // 見開き用のサイズ計算（コンテナ幅を2分割）
       const pageContainerWidth = containerWidth / 2;
 
-      // 現在ページと次のページを取得（1ページ目を除く）
-      const leftPageNum = readingDirection === 'rtl' ? currentPage + 1 : currentPage;
-      const rightPageNum = readingDirection === 'rtl' ? currentPage : currentPage + 1;
+      // 現在ページと次のページを取得
+      // 表紙モードOFFの場合、1ページ目から見開きが開始する
+      let leftPageNum, rightPageNum;
+      
+      if (treatFirstPageAsCover) {
+        // 表紙モードON：1ページ目は単独、2ページ目以降見開き
+        leftPageNum = readingDirection === 'rtl' ? currentPage + 1 : currentPage;
+        rightPageNum = readingDirection === 'rtl' ? currentPage : currentPage + 1;
+      } else {
+        // 表紙モードOFF：1ページ目から見開き
+        if (currentPage % 2 === 1) {
+          // 奇数ページの場合
+          leftPageNum = readingDirection === 'rtl' ? currentPage + 1 : currentPage;
+          rightPageNum = readingDirection === 'rtl' ? currentPage : currentPage + 1;
+        } else {
+          // 偶数ページの場合
+          leftPageNum = readingDirection === 'rtl' ? currentPage : currentPage - 1;
+          rightPageNum = readingDirection === 'rtl' ? currentPage - 1 : currentPage;
+        }
+      }
 
       // ページの存在チェック
       const hasLeftPage = leftPageNum >= 1 && leftPageNum <= pdfDocument.numPages;
@@ -620,26 +639,38 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       if (shouldGoNext) {
         // 次の見開きに進む
         let nextPage;
-        if (currentPage === 1) {
-          // 表紙から2ページ目に移動
-          nextPage = 2;
+        if (treatFirstPageAsCover) {
+          // 表紙モードON
+          if (currentPage === 1) {
+            // 表紙から2ページ目に移動
+            nextPage = 2;
+          } else {
+            // 通常の見開きナビゲーション
+            nextPage = Math.min(pdfDocument.numPages, currentPage + 2);
+          }
         } else {
-          // 通常の見開きナビゲーション
+          // 表紙モードOFF：1ページ目から見開き
           nextPage = Math.min(pdfDocument.numPages, currentPage + 2);
         }
         onPageChange(nextPage);
       } else {
         // 前の見開きに戻る
         let prevPage;
-        if (currentPage === 1) {
-          // 表紙は動かない
-          prevPage = 1;
-        } else if (currentPage === 2) {
-          // 2ページ目から表紙（1ページ目）に戻る
-          prevPage = 1;
+        if (treatFirstPageAsCover) {
+          // 表紙モードON
+          if (currentPage === 1) {
+            // 表紙は動かない
+            prevPage = 1;
+          } else if (currentPage === 2) {
+            // 2ページ目から表紙（1ページ目）に戻る
+            prevPage = 1;
+          } else {
+            // 通常の見開きナビゲーション
+            prevPage = Math.max(2, currentPage - 2);
+          }
         } else {
-          // 通常の見開きナビゲーション
-          prevPage = Math.max(2, currentPage - 2);
+          // 表紙モードOFF：1ページ目から見開き
+          prevPage = Math.max(1, currentPage - 2);
         }
         onPageChange(prevPage);
       }

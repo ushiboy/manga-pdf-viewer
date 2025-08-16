@@ -17,8 +17,10 @@ interface OverlayUIProps {
   onNextPage?: () => void;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
+  treatFirstPageAsCover: boolean;
   onToggleViewMode: () => void;
   onToggleReadingDirection: () => void;
+  onToggleTreatFirstPageAsCover: () => void;
   onResetSettings: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
@@ -41,8 +43,10 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   onNextPage,
   viewMode,
   readingDirection,
+  treatFirstPageAsCover,
   onToggleViewMode,
   onToggleReadingDirection,
+  onToggleTreatFirstPageAsCover,
   onResetSettings,
   onZoomIn,
   onZoomOut,
@@ -100,8 +104,10 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         onClose={handleCloseSettings}
         viewMode={viewMode}
         readingDirection={readingDirection}
+        treatFirstPageAsCover={treatFirstPageAsCover}
         onToggleViewMode={onToggleViewMode}
         onToggleReadingDirection={onToggleReadingDirection}
+        onToggleTreatFirstPageAsCover={onToggleTreatFirstPageAsCover}
         onResetSettings={onResetSettings}
       />
     </>

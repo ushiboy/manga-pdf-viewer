@@ -7,8 +7,10 @@ interface SettingsPanelProps {
   onClose: () => void;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
+  treatFirstPageAsCover: boolean;
   onToggleViewMode: () => void;
   onToggleReadingDirection: () => void;
+  onToggleTreatFirstPageAsCover: () => void;
   onResetSettings: () => void;
 }
 
@@ -17,15 +19,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onClose,
   viewMode,
   readingDirection,
+  treatFirstPageAsCover,
   onToggleViewMode,
   onToggleReadingDirection,
+  onToggleTreatFirstPageAsCover,
   onResetSettings
 }) => {
   const handleResetSettings = () => {
     const confirmed = window.confirm(
       '設定を初期値に戻しますか？\n\n' +
       '• 表示方式: 単一ページ\n' +
-      '• 読み方向: 右→左（日本語）\n\n' +
+      '• 読み方向: 右→左（日本語）\n' +
+      '• 表紙モード: ON（1ページ目を表紙として単独表示）\n\n' +
       'この操作は取り消せません。'
     );
     
@@ -149,6 +154,28 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 />
                 <span className="text-gray-400 dark:text-gray-500">ダーク（システム設定に従う）</span>
               </label>
+            </div>
+          </div>
+
+          {/* 見開き設定 */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+              🏷️ 見開き設定
+            </h3>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={treatFirstPageAsCover}
+                  onChange={onToggleTreatFirstPageAsCover}
+                  className="text-blue-600 focus:ring-blue-500 rounded"
+                />
+                <span className="text-gray-700 dark:text-gray-300">1ページ目を表紙として単独表示</span>
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                ON: 表紙（1ページ目）は単独、2ページ目以降見開き表示<br/>
+                OFF: 1ページ目から見開き表示
+              </p>
             </div>
           </div>
         </div>
