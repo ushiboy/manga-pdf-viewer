@@ -71,6 +71,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         currentPage={currentPage} 
         totalPages={totalPages}
         viewMode={viewMode}
+        readingDirection={readingDirection}
         onPageChange={onPageChange}
         onPreviousPage={onPreviousPage}
         onNextPage={onNextPage}

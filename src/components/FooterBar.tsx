@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from './ui/Button';
-import type { ViewMode } from '../types/settings';
+import type { ViewMode, ReadingDirection } from '../types/settings';
 
 interface FooterBarProps {
   isVisible: boolean;
   currentPage: number;
   totalPages: number;
   viewMode: ViewMode;
+  readingDirection: ReadingDirection;
   onPageChange: (page: number) => void;
   onPreviousPage?: () => void;
   onNextPage?: () => void;
@@ -22,6 +23,7 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   currentPage, 
   totalPages,
   viewMode,
+  readingDirection,
   onPageChange,
   onPreviousPage,
   onNextPage,
@@ -71,6 +73,35 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   const isAtLastSpread = viewMode === 'spread' && totalPages > 2 
     ? currentPage >= Math.max(2, totalPages - 1)
     : currentPage >= totalPages;
+
+  // RTL時にボタンの機能を逆転させる（アイコンは変更しない）
+  const getNavigationHandlers = () => {
+    if (readingDirection === 'rtl') {
+      return {
+        firstHandler: onGoToLast,
+        prevHandler: onNextPage,
+        nextHandler: onPreviousPage,
+        lastHandler: onGoToFirst,
+        firstTitle: "末尾ページ",
+        prevTitle: "次のページ", 
+        nextTitle: "前のページ",
+        lastTitle: "先頭ページ"
+      };
+    } else {
+      return {
+        firstHandler: onGoToFirst,
+        prevHandler: onPreviousPage,
+        nextHandler: onNextPage,
+        lastHandler: onGoToLast,
+        firstTitle: "先頭ページ",
+        prevTitle: "前のページ",
+        nextTitle: "次のページ", 
+        lastTitle: "末尾ページ"
+      };
+    }
+  };
+
+  const nav = getNavigationHandlers();
   return (
     <div
       className={`absolute bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
@@ -112,18 +143,26 @@ export const FooterBar: React.FC<FooterBarProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            title="先頭ページ"
-            onClick={onGoToFirst}
-            disabled={currentPage <= 1 || !onGoToFirst}
+            title={nav.firstTitle}
+            onClick={nav.firstHandler}
+            disabled={
+              readingDirection === 'rtl' 
+                ? (isAtLastSpread || !nav.firstHandler)
+                : (currentPage <= 1 || !nav.firstHandler)
+            }
           >
             ⏮️
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            title="前のページ"
-            onClick={onPreviousPage}
-            disabled={currentPage <= 1 || !onPreviousPage}
+            title={nav.prevTitle}
+            onClick={nav.prevHandler}
+            disabled={
+              readingDirection === 'rtl'
+                ? (isAtLastPage || !nav.prevHandler)
+                : (currentPage <= 1 || !nav.prevHandler)
+            }
           >
             ⬅️
           </Button>
@@ -147,18 +186,26 @@ export const FooterBar: React.FC<FooterBarProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            title="次のページ"
-            onClick={onNextPage}
-            disabled={isAtLastPage || !onNextPage}
+            title={nav.nextTitle}
+            onClick={nav.nextHandler}
+            disabled={
+              readingDirection === 'rtl'
+                ? (currentPage <= 1 || !nav.nextHandler)
+                : (isAtLastPage || !nav.nextHandler)
+            }
           >
             ➡️
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            title="末尾ページ"
-            onClick={onGoToLast}
-            disabled={isAtLastSpread || !onGoToLast}
+            title={nav.lastTitle}
+            onClick={nav.lastHandler}
+            disabled={
+              readingDirection === 'rtl'
+                ? (currentPage <= 1 || !nav.lastHandler)
+                : (isAtLastSpread || !nav.lastHandler)
+            }
           >
             ⏭️
           </Button>
