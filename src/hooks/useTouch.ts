@@ -150,18 +150,18 @@ export const useTouch = ({
     if (!onPreviousPage || !onNextPage) return;
     
     if (deltaX > 0) {
-      // 右スワイプ：RTLなら前のページ、LTRなら次のページ
+      // 右スワイプ（左→右）：RTLなら次のページ、LTRなら前のページ
       if (readingDirection === 'rtl') {
-        onPreviousPage();
-      } else {
         onNextPage();
+      } else {
+        onPreviousPage();
       }
     } else {
-      // 左スワイプ：RTLなら次のページ、LTRなら前のページ
+      // 左スワイプ（右→左）：RTLなら前のページ、LTRなら次のページ
       if (readingDirection === 'rtl') {
-        onNextPage();
-      } else {
         onPreviousPage();
+      } else {
+        onNextPage();
       }
     }
   }, [onPreviousPage, onNextPage, readingDirection]);
