@@ -79,6 +79,15 @@ const App: React.FC = () => {
     }
   }, [handlePageChange, currentPage, settings.viewMode]);
 
+  const goToFirstPage = useCallback(() => {
+    handlePageChange(1);
+  }, [handlePageChange]);
+
+  const goToLastPage = useCallback(() => {
+    if (!pdfDocument) return;
+    handlePageChange(pdfDocument.numPages);
+  }, [handlePageChange, pdfDocument]);
+
   // キーボードショートカット
   useKeyboard({
     onPreviousPage: goToPreviousPage,
@@ -118,6 +127,8 @@ const App: React.FC = () => {
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
         onToggleFitMode={cycleFitMode}
+        onGoToFirst={goToFirstPage}
+        onGoToLast={goToLastPage}
       />
       
       {!loadState.isLoaded && (

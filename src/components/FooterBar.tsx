@@ -9,6 +9,8 @@ interface FooterBarProps {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onToggleFitMode?: () => void;
+  onGoToFirst?: () => void;
+  onGoToLast?: () => void;
 }
 
 export const FooterBar: React.FC<FooterBarProps> = ({ 
@@ -18,7 +20,9 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   onPageChange,
   onZoomIn,
   onZoomOut,
-  onToggleFitMode
+  onToggleFitMode,
+  onGoToFirst,
+  onGoToLast
 }) => {
   const [inputValue, setInputValue] = useState(currentPage.toString());
 
@@ -103,6 +107,15 @@ export const FooterBar: React.FC<FooterBarProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
+            title="先頭ページ"
+            onClick={onGoToFirst}
+            disabled={currentPage <= 1 || !onGoToFirst}
+          >
+            ⏮️
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
             title="前のページ"
             onClick={goToPreviousPage}
             disabled={currentPage <= 1}
@@ -134,6 +147,15 @@ export const FooterBar: React.FC<FooterBarProps> = ({
             disabled={currentPage >= totalPages}
           >
             ➡️
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="末尾ページ"
+            onClick={onGoToLast}
+            disabled={currentPage >= totalPages || !onGoToLast}
+          >
+            ⏭️
           </Button>
         </div>
       </div>

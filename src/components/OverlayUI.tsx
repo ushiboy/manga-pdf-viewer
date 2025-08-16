@@ -16,6 +16,8 @@ interface OverlayUIProps {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onToggleFitMode?: () => void;
+  onGoToFirst?: () => void;
+  onGoToLast?: () => void;
 }
 
 export const OverlayUI: React.FC<OverlayUIProps> = ({ 
@@ -30,7 +32,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   onToggleReadingDirection,
   onZoomIn,
   onZoomOut,
-  onToggleFitMode
+  onToggleFitMode,
+  onGoToFirst,
+  onGoToLast
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -94,6 +98,8 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}
         onToggleFitMode={onToggleFitMode}
+        onGoToFirst={onGoToFirst}
+        onGoToLast={onGoToLast}
       />
     </>
   );
