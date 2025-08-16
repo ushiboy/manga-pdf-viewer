@@ -19,8 +19,9 @@ interface PdfViewerProps {
     fitMode: FitMode
   ) => number;
   onPageChange?: (page: number) => void;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
+  onZoomIn?: (currentDisplayScale?: number) => void;
+  onZoomOut?: (currentDisplayScale?: number) => void;
+  onPan?: (deltaX: number, deltaY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => void;
 }
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({ 
@@ -34,12 +35,16 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   calculateFitScale,
   onPageChange,
   onZoomIn,
-  onZoomOut
+  onZoomOut,
+  onPan
 }) => {
   const leftCanvasRef = useRef<HTMLCanvasElement>(null);
   const rightCanvasRef = useRef<HTMLCanvasElement>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 });
   
   // レンダリングタスクを管理するref
   const renderTasksRef = useRef<{
@@ -137,6 +142,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       // CSSサイズを設定
       canvas.style.width = `${viewport.width / devicePixelRatio}px`;
       canvas.style.height = `${viewport.height / devicePixelRatio}px`;
+      
+      // パン機能のためのオフセット適用
+      if (zoomState && zoomState.fitMode === 'custom') {
+        canvas.style.transform = `translate(${zoomState.offsetX}px, ${zoomState.offsetY}px)`;
+      } else {
+        canvas.style.transform = 'translate(0px, 0px)';
+      }
 
       // レンダリング実行
       const renderContext = {
@@ -221,6 +233,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           leftCanvas.height = viewport.height;
           leftCanvas.style.width = `${viewport.width / devicePixelRatio}px`;
           leftCanvas.style.height = `${viewport.height / devicePixelRatio}px`;
+          
+          // パン機能のためのオフセット適用（見開き左ページ）
+          if (zoomState && zoomState.fitMode === 'custom') {
+            leftCanvas.style.transform = `translate(${zoomState.offsetX}px, ${zoomState.offsetY}px)`;
+          } else {
+            leftCanvas.style.transform = 'translate(0px, 0px)';
+          }
 
           // レンダリングタスクを保存して実行
           const leftRenderTask = leftPage.render({
@@ -278,6 +297,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           rightCanvas.height = viewport.height;
           rightCanvas.style.width = `${viewport.width / devicePixelRatio}px`;
           rightCanvas.style.height = `${viewport.height / devicePixelRatio}px`;
+          
+          // パン機能のためのオフセット適用（見開き右ページ）
+          if (zoomState && zoomState.fitMode === 'custom') {
+            rightCanvas.style.transform = `translate(${zoomState.offsetX}px, ${zoomState.offsetY}px)`;
+          } else {
+            rightCanvas.style.transform = 'translate(0px, 0px)';
+          }
 
           // レンダリングタスクを保存して実行
           const rightRenderTask = rightPage.render({
@@ -400,18 +426,124 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     event.preventDefault();
     
     // ズーム機能が利用可能な場合のみ処理
-    if (onZoomIn && onZoomOut) {
+    if (onZoomIn && onZoomOut && pdfDocument && calculateFitScale && zoomState) {
+      // 現在の表示スケールを計算
+      const containerWidth = window.innerWidth - 32;
+      const uiHeight = isUIVisible ? 120 : 16;
+      const containerHeight = window.innerHeight - uiHeight;
+      
+      // 現在のページのベースビューポートを取得して表示スケールを計算（概算）
+      let currentDisplayScale = 1.0;
+      if (zoomState.fitMode !== 'custom') {
+        // 概算でのページサイズ（実際のPDFページサイズは取得が重いため）
+        const estimatedPageWidth = viewMode === 'spread' ? containerWidth / 2 : containerWidth;
+        const estimatedPageHeight = containerHeight;
+        currentDisplayScale = calculateFitScale(
+          estimatedPageWidth,
+          estimatedPageHeight,
+          containerWidth,
+          containerHeight,
+          zoomState.fitMode
+        );
+      }
+      
       if (event.deltaY < 0) {
         // ホイール上回転：ズームイン
-        onZoomIn();
+        onZoomIn(currentDisplayScale);
       } else {
         // ホイール下回転：ズームアウト
-        onZoomOut();
+        onZoomOut(currentDisplayScale);
       }
     }
   };
 
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    // カスタムズーム状態でのみパン操作を有効化
+    if (zoomState && zoomState.fitMode === 'custom' && onPan) {
+      event.preventDefault();
+      setIsDragging(true);
+      setDragStart({ x: event.clientX, y: event.clientY });
+      setLastPanPosition({ x: zoomState.offsetX, y: zoomState.offsetY });
+      
+      // カーソルをつかんでいる状態に変更
+      document.body.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging && onPan && zoomState && pdfDocument) {
+      event.preventDefault();
+      
+      const deltaX = event.clientX - dragStart.x;
+      const deltaY = event.clientY - dragStart.y;
+      
+      const newOffsetX = lastPanPosition.x + deltaX;
+      const newOffsetY = lastPanPosition.y + deltaY;
+      
+      // コンテナサイズを計算
+      const containerWidth = window.innerWidth - 32;
+      const uiHeight = isUIVisible ? 120 : 16;
+      const containerHeight = window.innerHeight - uiHeight;
+      
+      // 現在のページのベースサイズを取得（概算）
+      const pageWidth = viewMode === 'spread' ? containerWidth / 2 : containerWidth;
+      const pageHeight = containerHeight;
+      
+      onPan(newOffsetX, newOffsetY, containerWidth, containerHeight, pageWidth, pageHeight);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      document.body.style.cursor = '';
+    }
+  };
+
+  // グローバルマウスイベントのリスナー
+  React.useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        document.body.style.cursor = '';
+      }
+    };
+
+    const handleGlobalMouseMove = (event: MouseEvent) => {
+      if (isDragging && onPan && zoomState && pdfDocument) {
+        const deltaX = event.clientX - dragStart.x;
+        const deltaY = event.clientY - dragStart.y;
+        
+        const newOffsetX = lastPanPosition.x + deltaX;
+        const newOffsetY = lastPanPosition.y + deltaY;
+        
+        // コンテナサイズを計算
+        const containerWidth = window.innerWidth - 32;
+        const uiHeight = isUIVisible ? 120 : 16;
+        const containerHeight = window.innerHeight - uiHeight;
+        
+        // 現在のページのベースサイズを取得（概算）
+        const pageWidth = viewMode === 'spread' ? containerWidth / 2 : containerWidth;
+        const pageHeight = containerHeight;
+        
+        onPan(newOffsetX, newOffsetY, containerWidth, containerHeight, pageWidth, pageHeight);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart, lastPanPosition, onPan, zoomState]);
+
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    // ドラッグ操作の場合はクリックイベントを無視
+    if (isDragging || (zoomState && zoomState.fitMode === 'custom')) return;
     if (!onPageChange || !pdfDocument) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
@@ -479,9 +611,14 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   // PDF表示状態
   return (
     <div 
-      className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden cursor-pointer"
+      className={`flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden ${
+        zoomState && zoomState.fitMode === 'custom' ? 'cursor-grab' : 'cursor-pointer'
+      }`}
       onClick={handleClick}
       onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
       {renderError ? (
         <div className="text-center">

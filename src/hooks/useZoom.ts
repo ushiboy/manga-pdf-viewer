@@ -50,13 +50,13 @@ export const useZoom = () => {
     });
   }, []);
 
-  const zoomIn = useCallback(() => {
+  const zoomIn = useCallback((currentDisplayScale?: number) => {
     setZoomState(prev => {
       let baseScale = prev.scale;
       
       // fitModeがcustom以外の場合は、現在表示されている倍率を基準にする
-      if (prev.fitMode !== 'custom') {
-        baseScale = 1.0; // とりあえず1.0として、後で実際の表示倍率で更新
+      if (prev.fitMode !== 'custom' && currentDisplayScale) {
+        baseScale = currentDisplayScale;
       }
       
       const newScale = baseScale * 1.25;
@@ -69,17 +69,19 @@ export const useZoom = () => {
         ...prev,
         scale: clampedScale,
         fitMode: 'custom',
+        offsetX: 0, // ズーム変更時はオフセットをリセット
+        offsetY: 0,
       };
     });
   }, []);
 
-  const zoomOut = useCallback(() => {
+  const zoomOut = useCallback((currentDisplayScale?: number) => {
     setZoomState(prev => {
       let baseScale = prev.scale;
       
       // fitModeがcustom以外の場合は、現在表示されている倍率を基準にする
-      if (prev.fitMode !== 'custom') {
-        baseScale = 1.0; // とりあえず1.0として、後で実際の表示倍率で更新
+      if (prev.fitMode !== 'custom' && currentDisplayScale) {
+        baseScale = currentDisplayScale;
       }
       
       const newScale = baseScale / 1.25;
@@ -92,6 +94,8 @@ export const useZoom = () => {
         ...prev,
         scale: clampedScale,
         fitMode: 'custom',
+        offsetX: 0, // ズーム変更時はオフセットをリセット
+        offsetY: 0,
       };
     });
   }, []);
@@ -105,12 +109,38 @@ export const useZoom = () => {
     }));
   }, []);
 
-  const setOffset = useCallback((offsetX: number, offsetY: number) => {
-    setZoomState(prev => ({
-      ...prev,
-      offsetX,
-      offsetY,
-    }));
+  const setOffset = useCallback((offsetX: number, offsetY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => {
+    setZoomState(prev => {
+      let clampedOffsetX = offsetX;
+      let clampedOffsetY = offsetY;
+      
+      // パン範囲制限を適用（ページとコンテナサイズが提供された場合）
+      if (containerWidth && containerHeight && pageWidth && pageHeight && prev.fitMode === 'custom') {
+        const scaledPageWidth = pageWidth * prev.scale;
+        const scaledPageHeight = pageHeight * prev.scale;
+        
+        // ページがコンテナより大きい場合のみ制限を適用
+        if (scaledPageWidth > containerWidth) {
+          const maxOffsetX = (scaledPageWidth - containerWidth) / 2;
+          clampedOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX));
+        } else {
+          clampedOffsetX = 0; // ページがコンテナより小さい場合は中央固定
+        }
+        
+        if (scaledPageHeight > containerHeight) {
+          const maxOffsetY = (scaledPageHeight - containerHeight) / 2;
+          clampedOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY));
+        } else {
+          clampedOffsetY = 0; // ページがコンテナより小さい場合は中央固定
+        }
+      }
+      
+      return {
+        ...prev,
+        offsetX: clampedOffsetX,
+        offsetY: clampedOffsetY,
+      };
+    });
   }, []);
 
   const cycleFitMode = useCallback(() => {

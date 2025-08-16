@@ -11,7 +11,11 @@ const App: React.FC = () => {
   const [isUIVisible, setIsUIVisible] = useState(true);
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
   const { settings, toggleViewMode, toggleReadingDirection } = useSettings();
-  const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale } = useZoom();
+  const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale, setOffset } = useZoom();
+  
+  // ズーム関数をラップして現在の表示スケールを渡す
+  const handleZoomIn = useCallback(() => zoomIn(), [zoomIn]);
+  const handleZoomOut = useCallback(() => zoomOut(), [zoomOut]);
 
   const handleFileSelect = useCallback((file: File) => {
     loadPdf(file);
@@ -116,14 +120,18 @@ const App: React.FC = () => {
     }
   }, [handlePageChange, pdfDocument, settings.viewMode]);
 
+  const handlePan = useCallback((offsetX: number, offsetY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => {
+    setOffset(offsetX, offsetY, containerWidth, containerHeight, pageWidth, pageHeight);
+  }, [setOffset]);
+
   // キーボードショートカット
   useKeyboard({
     onPreviousPage: goToPreviousPage,
     onNextPage: goToNextPage,
     enabled: loadState.isLoaded,
     readingDirection: settings.readingDirection,
-    onZoomIn: zoomIn,
-    onZoomOut: zoomOut,
+    onZoomIn: handleZoomIn,
+    onZoomOut: handleZoomOut,
   });
 
   return (
@@ -138,8 +146,9 @@ const App: React.FC = () => {
         zoomState={zoomState}
         calculateFitScale={calculateFitScale}
         onPageChange={handlePageChange}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onPan={handlePan}
       />
       
       <OverlayUI 
@@ -152,8 +161,8 @@ const App: React.FC = () => {
         readingDirection={settings.readingDirection}
         onToggleViewMode={toggleViewMode}
         onToggleReadingDirection={toggleReadingDirection}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
         onToggleFitMode={cycleFitMode}
         onGoToFirst={goToFirstPage}
         onGoToLast={goToLastPage}
