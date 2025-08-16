@@ -8,6 +8,8 @@ interface FooterBarProps {
   totalPages: number;
   viewMode: ViewMode;
   onPageChange: (page: number) => void;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onToggleFitMode?: () => void;
@@ -21,6 +23,8 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   totalPages,
   viewMode,
   onPageChange,
+  onPreviousPage,
+  onNextPage,
   onZoomIn,
   onZoomOut,
   onToggleFitMode,
@@ -29,17 +33,6 @@ export const FooterBar: React.FC<FooterBarProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(currentPage.toString());
 
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      onPageChange(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      onPageChange(currentPage + 1);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -129,8 +122,8 @@ export const FooterBar: React.FC<FooterBarProps> = ({
             variant="ghost" 
             size="sm" 
             title="前のページ"
-            onClick={goToPreviousPage}
-            disabled={currentPage <= 1}
+            onClick={onPreviousPage}
+            disabled={currentPage <= 1 || !onPreviousPage}
           >
             ⬅️
           </Button>
@@ -155,8 +148,8 @@ export const FooterBar: React.FC<FooterBarProps> = ({
             variant="ghost" 
             size="sm" 
             title="次のページ"
-            onClick={goToNextPage}
-            disabled={isAtLastPage}
+            onClick={onNextPage}
+            disabled={isAtLastPage || !onNextPage}
           >
             ➡️
           </Button>

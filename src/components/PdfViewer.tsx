@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoadingSpinner } from './ui/LoadingSpinner';
+import { useTouch } from '../hooks/useTouch';
 import type { PdfDocument, PdfLoadState } from '../types/pdf';
 import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../types/settings';
 
@@ -19,6 +20,8 @@ interface PdfViewerProps {
     fitMode: FitMode
   ) => number;
   onPageChange?: (page: number) => void;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
   onZoomIn?: (currentDisplayScale?: number) => void;
   onZoomOut?: (currentDisplayScale?: number) => void;
   onPan?: (deltaX: number, deltaY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => void;
@@ -34,6 +37,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   zoomState,
   calculateFitScale,
   onPageChange,
+  onPreviousPage,
+  onNextPage,
   onZoomIn,
   onZoomOut,
   onPan
@@ -52,6 +57,32 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     right?: any;
     single?: any;
   }>({});
+
+  // タッチ操作用のページ移動関数（App.tsxの見開き対応ロジックを使用）
+  const handleTouchPreviousPage = React.useCallback(() => {
+    if (onPreviousPage) {
+      onPreviousPage();
+    }
+  }, [onPreviousPage]);
+
+  const handleTouchNextPage = React.useCallback(() => {
+    if (onNextPage) {
+      onNextPage();
+    }
+  }, [onNextPage]);
+
+  // タッチ操作の統合
+  const { handleTouchStart, handleTouchMove, handleTouchEnd, updatePanPosition } = useTouch({
+    onPreviousPage: handleTouchPreviousPage,
+    onNextPage: handleTouchNextPage,
+    onZoomIn,
+    onZoomOut,
+    onPan,
+    enabled: !!pdfDocument,
+    viewMode,
+    readingDirection,
+    isZoomed: zoomState?.fitMode === 'custom',
+  });
 
   useEffect(() => {
     if (!pdfDocument) return;
@@ -357,6 +388,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     };
   }, [pdfDocument, currentPage, isUIVisible, viewMode, readingDirection, zoomState, calculateFitScale]);
 
+  // タッチ操作のパン位置を同期
+  useEffect(() => {
+    if (zoomState && updatePanPosition) {
+      updatePanPosition(zoomState.offsetX, zoomState.offsetY);
+    }
+  }, [zoomState?.offsetX, zoomState?.offsetY, updatePanPosition]);
+
   // グローバルマウスイベントのリスナー
   React.useEffect(() => {
     const handleGlobalMouseUp = () => {
@@ -619,6 +657,9 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {renderError ? (
         <div className="text-center">

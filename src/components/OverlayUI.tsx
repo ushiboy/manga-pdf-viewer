@@ -9,6 +9,8 @@ interface OverlayUIProps {
   onFileSelect: (file: File) => void;
   onVisibilityChange?: (isVisible: boolean) => void;
   onPageChange: (page: number) => void;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
   onToggleViewMode: () => void;
@@ -28,6 +30,8 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   onFileSelect,
   onVisibilityChange,
   onPageChange,
+  onPreviousPage,
+  onNextPage,
   viewMode,
   readingDirection,
   onToggleViewMode,
@@ -105,6 +109,8 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         totalPages={totalPages}
         viewMode={viewMode}
         onPageChange={onPageChange}
+        onPreviousPage={onPreviousPage}
+        onNextPage={onNextPage}
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}
         onToggleFitMode={onToggleFitMode}

@@ -149,6 +149,8 @@ const App: React.FC = () => {
         zoomState={zoomState}
         calculateFitScale={calculateFitScale}
         onPageChange={handlePageChange}
+        onPreviousPage={goToPreviousPage}
+        onNextPage={goToNextPage}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onPan={handlePan}
@@ -160,6 +162,8 @@ const App: React.FC = () => {
         onFileSelect={handleFileSelect}
         onVisibilityChange={setIsUIVisible}
         onPageChange={handlePageChange}
+        onPreviousPage={goToPreviousPage}
+        onNextPage={goToNextPage}
         viewMode={settings.viewMode}
         readingDirection={settings.readingDirection}
         onToggleViewMode={toggleViewMode}
