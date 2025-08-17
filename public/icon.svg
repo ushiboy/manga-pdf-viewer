@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="512" height="512" fill="#2563eb" rx="64"/>
+  
+  <!-- 本の外観 -->
+  <g transform="translate(64, 64)">
+    <!-- メインの本 -->
+    <rect x="0" y="0" width="300" height="384" fill="#ffffff" rx="8" stroke="#e5e7eb" stroke-width="2"/>
+    
+    <!-- 見開きの中央線 -->
+    <line x1="150" y1="0" x2="150" y2="384" stroke="#e5e7eb" stroke-width="3"/>
+    
+    <!-- 左ページのコンテンツ（漫画パネル風） -->
+    <rect x="20" y="30" width="110" height="80" fill="#f3f4f6" rx="4"/>
+    <rect x="20" y="130" width="50" height="40" fill="#f3f4f6" rx="4"/>
+    <rect x="80" y="130" width="50" height="40" fill="#f3f4f6" rx="4"/>
+    <rect x="20" y="190" width="110" height="60" fill="#f3f4f6" rx="4"/>
+    
+    <!-- 右ページのコンテンツ（漫画パネル風） -->
+    <rect x="170" y="30" width="110" height="60" fill="#f3f4f6" rx="4"/>
+    <rect x="170" y="110" width="50" height="50" fill="#f3f4f6" rx="4"/>
+    <rect x="230" y="110" width="50" height="50" fill="#f3f4f6" rx="4"/>
+    <rect x="170" y="180" width="110" height="80" fill="#f3f4f6" rx="4"/>
+    
+    <!-- 吹き出し（セリフ） -->
+    <ellipse cx="75" cy="70" rx="25" ry="15" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+    <ellipse cx="225" cy="50" rx="20" ry="12" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+    
+    <!-- ページめくりの影 -->
+    <path d="M280 0 Q300 20 300 40 L300 344 Q300 364 280 384 L8 384 Q0 376 0 368 L0 16 Q0 8 8 0 Z" fill="rgba(0,0,0,0.1)"/>
+  </g>
+  
+  <!-- PDFアイコン -->
+  <g transform="translate(340, 350)">
+    <rect x="0" y="0" width="80" height="100" fill="#dc2626" rx="6"/>
+    <text x="40" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="24">PDF</text>
+  </g>
+</svg>
