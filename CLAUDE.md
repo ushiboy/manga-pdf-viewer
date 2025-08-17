@@ -1,15 +1,18 @@
 # 漫画本PDFビューワー開発仕様書
 
 ## プロジェクト概要
-ブラウザで動作する漫画本専用のPDFビューワーを開発する。
-漫画の読書体験に最適化されたUI/UXを提供し、日本の漫画と海外の漫画両方に対応する。
+ブラウザで動作する漫画本専用のPDFビューワーです。
+漫画の読書体験に最適化されたUI/UXを提供し、日本の漫画と海外の漫画両方に対応。
+PWA（Progressive Web App）として動作し、オフライン環境でも利用可能です。
 
 ## 技術要件
 - React 19+ with TypeScript
 - Vite（開発環境・ビルドツール）
 - pnpm（パッケージ管理）
-- PDF.js ライブラリ（npm経由）
+- PDF.js ライブラリ（npm経由：pdfjs-dist v4.8.69）
 - Tailwind CSS v4（スタイリング）
+- PWA対応（vite-plugin-pwa v1.0.2）
+- Service Worker & Web App Manifest
 - レスポンシブデザイン（デスクトップ・タブレット・スマートフォン対応）
 - ローカルストレージを使用した設定保存
 - UIのデザインはシンプルだがモダンな感じで
@@ -32,6 +35,11 @@
   - 右から左（日本の漫画形式）- デフォルト
   - 左から右（海外の漫画形式）
   - 設定で切り替え可能
+  - 読み方向に応じたナビゲーション操作の自動調整
+- **表紙モード**:
+  - 見開き表示時に1ページ目を表紙として単独表示するかの設定
+  - ON（デフォルト）：1ページ目単独、2ページ目以降見開き
+  - OFF：1ページ目から見開き表示
 
 ### 3. ページナビゲーション機能
 - 前ページ・次ページ移動
@@ -49,29 +57,29 @@
 
 ### 6. 操作方法
 - **マウス操作**:
-  - 左クリック: 次ページ
+  - 左クリック: 次ページ（読み方向対応）
   - 右クリック: 前ページ（コンテキストメニュー無効化）
   - ホイール: ズーム
 - **キーボード操作**:
-  - 左矢印: 前ページ
-  - 右矢印: 次ページ
+  - 左矢印: 前ページ（読み方向対応）
+  - 右矢印: 次ページ（読み方向対応）
   - +: ズームイン
   - -: ズームアウト
   - F11: フルスクリーン切り替え
   - V: 表示方式切り替え
   - R: 読み方向切り替え
 - **タッチ操作**:
-  - 左スワイプ: 次ページ
-  - 右スワイプ: 前ページ
+  - スワイプ: ページめくり（読み方向に応じて左右逆転）
   - ピンチイン/アウト: ズーム
-  - タップ: ページめくり（画面分割対応）
+  - タップ: ページめくり（画面分割・読み方向対応）
+  - ダブルタップ: ズーム切り替え
 
 ## UI/UX設計
 
 ### 1. オーバーレイUI
-- 通常時は非表示
-- マウス移動やタッチで一定時間表示
-- 一定時間操作がないと自動的に非表示
+- **手動トグル方式**: UI表示/非表示をボタンで切り替え
+- **非表示時**: 左上にフローティング表示ボタン（ハンバーガーメニューアイコン）
+- **表示時**: ヘッダー左端の非表示ボタンで非表示に切り替え
 
 ### 2. UIコンポーネント
 - **ヘッダーバー**:
@@ -84,10 +92,11 @@
   - ズームボタン（-/+）
   - ページナビゲーション（前/次/ジャンプ）
   - ページ情報表示
-- **サイドパネル**（設定画面）:
-  - ダークモード切り替え
-  - 読み方向設定
-  - 初期表示設定
+- **設定パネル**（モーダル形式）:
+  - 表示方式設定（単ページ・見開き）
+  - 読み方向設定（RTL・LTR）
+  - 表紙モード設定
+  - 設定リセット機能
   - キーボードショートカット一覧
 
 ### 3. テーマ対応
@@ -116,23 +125,24 @@
 - **Tailwind CSS**: ユーティリティファーストCSS（4.x系）
 - **PDF.js**: PDF処理ライブラリ（npm版）
 
-### 3. 必要なnpmパッケージ
+### 3. 実装済みnpmパッケージ
 ```json
 {
   "dependencies": {
-    "react": "^19.x",
-    "react-dom": "^19.x",
-    "pdfjs-dist": "^x.x.x"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "pdfjs-dist": "^4.8.69",
+    "workbox-window": "^7.3.0"
   },
   "devDependencies": {
-    "@types/react": "^19.x",
-    "@types/react-dom": "^19.x",
-    "@vitejs/plugin-react": "^x.x.x",
-    "typescript": "^5.x",
-    "vite": "^x.x.x",
-    "tailwindcss": "^4.x",
-    "autoprefixer": "^10.x",
-    "postcss": "^8.x"
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.6.2",
+    "vite": "^6.0.1",
+    "@tailwindcss/vite": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "vite-plugin-pwa": "^1.0.2"
   }
 }
 ```
@@ -147,15 +157,17 @@
 - TypeScript型定義によるタイプセーフなPDF操作
 
 ### 2. 状態管理
-- React Hooks（useState, useEffect, useContext）を活用
+- React Hooks（useState, useEffect, useCallback）を活用
 - カスタムHooksによる状態管理の抽象化
 - 以下の状態をグローバルで管理:
   - 現在ページ
   - ズーム倍率
-  - 表示方式
-  - 読み方向
-  - テーマ設定
+  - 表示方式（単ページ・見開き）
+  - 読み方向（RTL・LTR）
+  - 表紙モード設定
+  - UIの表示/非表示状態
 - ユーザー設定をlocalStorageで永続化
+- 設定変更の即座反映
 
 ### 3. コンポーネント設計
 - 関数コンポーネント + Hooksパターン
@@ -183,69 +195,67 @@
 - ページ切り替え時のローディングスピナー
 - 大容量ファイル対応
 
-## プロジェクト構成
+## 実装済みプロジェクト構成
 ```
-manga-pdf-viewer/
-├── package.json
-├── pnpm-lock.yaml
-├── tsconfig.json
-├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-├── index.html
+comic-viewer/
+├── package.json              # 依存関係定義
+├── pnpm-lock.yaml           # パッケージロックファイル
+├── tsconfig.json            # TypeScript設定（PWA型定義含む）
+├── vite.config.ts           # Vite & PWA設定
+├── index.html               # エントリーポイント
 ├── public/
-├── src/
-│   ├── main.tsx              # アプリケーションエントリーポイント
-│   ├── App.tsx               # メインアプリケーションコンポーネント
-│   ├── components/
-│   │   ├── ui/               # 再利用可能UIコンポーネント
-│   │   │   ├── Button.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   └── LoadingSpinner.tsx
-│   │   ├── PdfViewer.tsx     # PDFビューワーメインコンポーネント
-│   │   ├── OverlayUI.tsx     # オーバーレイUI
-│   │   ├── HeaderBar.tsx     # ヘッダーバー
-│   │   ├── FooterBar.tsx     # フッターバー
-│   │   ├── SettingsPanel.tsx # 設定パネル
-│   │   └── ErrorBoundary.tsx # エラーバウンダリ
-│   ├── hooks/
-│   │   ├── usePdfDocument.ts # PDF処理カスタムHook
-│   │   ├── useSettings.ts    # 設定管理カスタムHook
-│   │   ├── useKeyboard.ts    # キーボード操作カスタムHook
-│   │   └── useTouch.ts       # タッチ操作カスタムHook
-│   ├── contexts/
-│   │   ├── AppContext.tsx    # アプリケーション状態コンテキスト
-│   │   └── SettingsContext.tsx # 設定状態コンテキスト
-│   ├── types/
-│   │   ├── pdf.ts            # PDF関連型定義
-│   │   ├── settings.ts       # 設定関連型定義
-│   │   └── ui.ts             # UI関連型定義
-│   ├── utils/
-│   │   ├── pdfWorker.ts      # PDF処理ユーティリティ
-│   │   ├── storage.ts        # ローカルストレージユーティリティ
-│   │   └── constants.ts      # 定数定義
-│   └── styles/
-       ├── globals.css        # グローバルスタイル（Tailwind import）
-       └── components.css     # コンポーネント固有スタイル
+│   ├── favicon-192x192.png  # PWAアイコン（192x192）
+│   ├── favicon-512x512.png  # PWAアイコン（512x512）
+│   └── icon.svg             # ソースアイコン（SVG）
+├── dist/                    # ビルド出力（PWAファイル含む）
+│   ├── manifest.webmanifest # PWAマニフェスト
+│   ├── sw.js               # Service Worker
+│   └── workbox-*.js        # Workboxライブラリ
+└── src/
+    ├── main.tsx             # アプリケーションエントリーポイント
+    ├── App.tsx              # メインアプリケーションコンポーネント
+    ├── components/
+    │   ├── PdfViewer.tsx    # PDFビューワーメインコンポーネント
+    │   ├── OverlayUI.tsx    # オーバーレイUI管理
+    │   ├── HeaderBar.tsx    # ヘッダーバー
+    │   ├── FooterBar.tsx    # フッターバー（RTL対応）
+    │   ├── SettingsPanel.tsx # 設定モーダルパネル
+    │   ├── FloatingShowButton.tsx # UI表示ボタン
+    │   └── PWAUpdateNotification.tsx # PWA更新通知
+    ├── hooks/
+    │   ├── usePdfDocument.ts # PDF処理カスタムHook
+    │   ├── useSettings.ts   # 設定管理カスタムHook
+    │   ├── useKeyboard.ts   # キーボード操作カスタムHook
+    │   ├── useTouch.ts      # タッチ操作カスタムHook（RTL対応）
+    │   ├── useZoom.ts       # ズーム機能カスタムHook
+    │   └── useFullscreen.ts # フルスクリーン機能カスタムHook
+    ├── types/
+    │   └── settings.ts      # 設定関連型定義
+    └── styles/
+        └── globals.css      # グローバルスタイル（Tailwind CSS）
 ```
 
-## 開発優先度
-1. **高**: 基本的なReactコンポーネント構成・TypeScript環境構築
-2. **高**: PDF読み込み・表示・ページめくり機能（usePdfDocumentフック）
-3. **高**: マウス・キーボード操作（カスタムHooks）
-4. **中**: ズーム・フルスクリーン機能
-5. **中**: オーバーレイUI・設定画面（React状態管理）
-6. **中**: タッチ操作対応（useTouchフック）
-7. **低**: Tailwind CSSダークモード・テーマ機能
-8. **低**: 高度な最適化・アニメーション
+## 実装完了機能
+- ✅ **基本機能**: PDF読み込み・表示・ページめくり・ズーム・フルスクリーン
+- ✅ **操作システム**: マウス・キーボード・タッチ操作（RTL/LTR対応）
+- ✅ **UI/UX**: 手動トグル式オーバーレイUI・設定パネル・レスポンシブ対応
+- ✅ **表示機能**: 単ページ・見開き表示・表紙モード・読み方向対応
+- ✅ **設定管理**: localStorage永続化・設定リセット機能
+- ✅ **PWA機能**: Service Worker・オフライン対応・インストール可能・自動更新
+
+## 技術的特徴
+- **PWA対応**: オフライン利用可能・ホーム画面インストール・自動更新通知
+- **RTL/LTR対応**: 日本漫画（右→左）・海外漫画（左→右）の読み方向切り替え
+- **レスポンシブ**: デスクトップ・タブレット・スマートフォン完全対応
+- **型安全**: TypeScript完全活用・カスタムHooks・コンポーネント設計
+- **パフォーマンス**: React 19・Vite・最適化されたキャッシュ戦略
 
 ## 成果物
-- Viteでビルドされた静的サイト
-- npm/pnpmで依存関係管理
-- 型安全なTypeScriptコード
-- React 19の最新機能を活用した高性能コンポーネント
-- 再利用可能なReactコンポーネント
-- Tailwind CSS v4による統一されたデザインシステム
+- **PWA対応の漫画専用PDFビューワー**
+- Viteでビルドされた高速静的サイト
+- Service Worker・Web App Manifest完備
+- 型安全なTypeScriptコードベース
+- Tailwind CSS v4による統一デザインシステム
 - モダンブラウザ対応（Chrome, Firefox, Safari, Edge）
 
 ## 開発コマンド
@@ -266,8 +276,47 @@ pnpm build
 pnpm preview
 ```
 
+## PWA機能詳細
+
+### Service Worker
+- アプリケーション本体の完全キャッシュ
+- 画像ファイルの効率的キャッシュ（30日間・最大100エントリ）
+- PDFファイルは除外（ユーザーストレージ節約）
+- 自動更新検知・通知機能
+
+### Web App Manifest
+- アプリ名：「漫画本PDFビューワー」（MangaPDF）
+- カスタムアイコン：漫画本をイメージしたオリジナルデザイン
+- スタンドアロン表示モード
+- 画面向き：任意（縦・横両対応）
+
+### インストール & 利用
+- ブラウザの「ホーム画面に追加」でPWAインストール
+- オフライン環境でアプリ起動・操作可能
+- ネイティブアプリ風の体験
+
+## 特徴的な実装
+
+### RTL/LTR対応
+- 読み方向に応じたナビゲーション操作の自動調整
+- フッターボタンの機能逆転（RTL時）
+- スワイプ方向の動的変更
+- タップ領域の読み方向対応
+
+### 表紙モード
+- 見開き表示での1ページ目の扱いを設定可能
+- ON：表紙として単独表示、2ページ目以降見開き
+- OFF：1ページ目から見開き表示
+- ページナビゲーションロジックの動的調整
+
+### 手動UI制御
+- 従来の自動表示/非表示から手動トグルに変更
+- フローティング表示ボタンによる直感的操作
+- 読書に集中できるUI設計
+
 ## 補足事項
 - 漫画の読書体験を最優先に設計
 - 直感的な操作感を重視
 - 軽量で高速な動作
-- オフライン環境での利用可能
+- PWAによるオフライン環境対応
+- 日本語・海外漫画両方に最適化
