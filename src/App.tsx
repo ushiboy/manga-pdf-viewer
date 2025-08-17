@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { PdfViewer } from './components/PdfViewer';
 import { OverlayUI } from './components/OverlayUI';
+import { PWAUpdateNotification } from './components/PWAUpdateNotification';
 import { usePdfDocument } from './hooks/usePdfDocument';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useSettings } from './hooks/useSettings';
@@ -225,6 +226,9 @@ const App: React.FC = () => {
           onDrop={handleDrop}
         />
       )}
+      
+      {/* PWA更新通知 */}
+      <PWAUpdateNotification />
     </div>
   );
 };

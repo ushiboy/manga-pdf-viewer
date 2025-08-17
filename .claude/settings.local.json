@@ -7,7 +7,15 @@
       "Bash(git init:*)",
       "Bash(echo:*)",
       "Bash(git add:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "WebSearch",
+      "Bash(pnpm add:*)",
+      "Bash(convert:*)",
+      "Bash(rm:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm build:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm preview:*)"
     ],
     "deny": [],
     "ask": []
