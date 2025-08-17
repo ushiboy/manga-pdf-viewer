@@ -15,7 +15,8 @@
       "Bash(pnpm type-check:*)",
       "Bash(pnpm build:*)",
       "Bash(cat:*)",
-      "Bash(pnpm preview:*)"
+      "Bash(pnpm preview:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
