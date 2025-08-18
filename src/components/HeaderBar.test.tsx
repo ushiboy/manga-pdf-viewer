@@ -203,8 +203,7 @@ describe('HeaderBar', () => {
   describe('Optional Props', () => {
     it('should handle missing onToggleFullscreen prop', async () => {
       const user = userEvent.setup();
-      const propsWithoutFullscreen = { ...defaultProps };
-      delete propsWithoutFullscreen.onToggleFullscreen;
+      const propsWithoutFullscreen = { ...defaultProps, onToggleFullscreen: undefined };
       
       const { getByTitle } = render(<HeaderBar {...propsWithoutFullscreen} />);
       
@@ -216,8 +215,7 @@ describe('HeaderBar', () => {
     });
 
     it('should default isFullscreen to false when not provided', () => {
-      const propsWithoutFullscreen = { ...defaultProps };
-      delete propsWithoutFullscreen.isFullscreen;
+      const propsWithoutFullscreen = { ...defaultProps, isFullscreen: undefined };
       
       const { getByTitle } = render(<HeaderBar {...propsWithoutFullscreen} />);
       

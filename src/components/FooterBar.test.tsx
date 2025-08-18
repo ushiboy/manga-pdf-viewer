@@ -73,8 +73,7 @@ describe('FooterBar', () => {
     });
 
     it('should disable zoom out button when onZoomOut is not provided', () => {
-      const propsWithoutZoomOut = { ...defaultProps };
-      delete propsWithoutZoomOut.onZoomOut;
+      const propsWithoutZoomOut = { ...defaultProps, onZoomOut: undefined };
       
       const { getByTitle } = render(<FooterBar {...propsWithoutZoomOut} />);
       
@@ -83,8 +82,7 @@ describe('FooterBar', () => {
     });
 
     it('should disable zoom in button when onZoomIn is not provided', () => {
-      const propsWithoutZoomIn = { ...defaultProps };
-      delete propsWithoutZoomIn.onZoomIn;
+      const propsWithoutZoomIn = { ...defaultProps, onZoomIn: undefined };
       
       const { getByTitle } = render(<FooterBar {...propsWithoutZoomIn} />);
       
