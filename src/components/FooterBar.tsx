@@ -104,6 +104,8 @@ export const FooterBar: React.FC<FooterBarProps> = ({
   const nav = getNavigationHandlers();
   return (
     <div
+      role="toolbar"
+      aria-label="PDF viewer navigation and controls"
       className={`absolute bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
       }`}
@@ -176,6 +178,7 @@ export const FooterBar: React.FC<FooterBarProps> = ({
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               onBlur={handleInputBlur}
+              aria-label="Current page number"
               className="w-16 px-2 py-1 text-sm text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <span className="text-sm text-gray-600 dark:text-gray-400">
