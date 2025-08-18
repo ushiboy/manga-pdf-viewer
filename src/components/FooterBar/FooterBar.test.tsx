@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FooterBar } from './FooterBar';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import type { ViewMode, ReadingDirection } from '../../types/settings';
 
 describe('FooterBar', () => {
   const defaultProps = {
