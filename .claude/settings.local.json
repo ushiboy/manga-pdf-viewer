@@ -16,7 +16,11 @@
       "Bash(pnpm build:*)",
       "Bash(cat:*)",
       "Bash(pnpm preview:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git checkout:*)",
+      "Bash(pnpm test:run:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
