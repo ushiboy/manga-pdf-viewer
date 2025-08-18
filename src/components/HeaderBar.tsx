@@ -42,6 +42,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
   return (
     <div
+      role="toolbar"
+      aria-label="PDF viewer controls"
       className={`absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300 ${
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       }`}
@@ -66,6 +68,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accept=".pdf"
             onChange={handleFileChange}
             className="hidden"
+            aria-label="PDF file selection"
+            aria-describedby="file-select-description"
           />
         </div>
         
