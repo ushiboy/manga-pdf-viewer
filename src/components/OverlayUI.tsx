@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { HeaderBar } from './HeaderBar';
-import { FooterBar } from './FooterBar';
-import { FloatingShowButton } from './FloatingShowButton';
-import { SettingsPanel } from './SettingsPanel';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import React, { useState } from "react";
+import { HeaderBar } from "./HeaderBar";
+import { FooterBar } from "./FooterBar";
+import { FloatingShowButton } from "./FloatingShowButton";
+import { SettingsPanel } from "./SettingsPanel";
+import type { ViewMode, ReadingDirection } from "../types/settings";
 
 interface OverlayUIProps {
   currentPage: number;
@@ -31,8 +31,8 @@ interface OverlayUIProps {
   onToggleFullscreen?: () => void;
 }
 
-export const OverlayUI: React.FC<OverlayUIProps> = ({ 
-  currentPage, 
+export const OverlayUI: React.FC<OverlayUIProps> = ({
+  currentPage,
   totalPages,
   isVisible,
   onFileSelect,
@@ -54,7 +54,7 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
   onGoToFirst,
   onGoToLast,
   isFullscreen = false,
-  onToggleFullscreen
+  onToggleFullscreen,
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -68,12 +68,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
 
   return (
     <>
-      <FloatingShowButton 
+      <FloatingShowButton isVisible={isVisible} onShow={onShow} />
+      <HeaderBar
         isVisible={isVisible}
-        onShow={onShow}
-      />
-      <HeaderBar 
-        isVisible={isVisible} 
         onFileSelect={onFileSelect}
         onHide={onHide}
         viewMode={viewMode}
@@ -84,9 +81,9 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         onToggleFullscreen={onToggleFullscreen}
         onOpenSettings={handleOpenSettings}
       />
-      <FooterBar 
-        isVisible={isVisible} 
-        currentPage={currentPage} 
+      <FooterBar
+        isVisible={isVisible}
+        currentPage={currentPage}
         totalPages={totalPages}
         viewMode={viewMode}
         readingDirection={readingDirection}

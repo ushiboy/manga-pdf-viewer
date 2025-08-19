@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SettingsPanel } from './SettingsPanel';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import type { ViewMode, ReadingDirection } from '../../types/settings';
 
 describe('SettingsPanel', () => {
   const defaultProps = {
