@@ -44,7 +44,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-title"
+    >
       {/* オーバーレイ */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -55,13 +60,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4">
         {/* ヘッダー */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 
+            id="settings-title"
+            className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+          >
             ⚙️ 設定
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
+            aria-label="設定パネルを閉じる"
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
             ✕
@@ -71,11 +80,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         {/* 設定項目 */}
         <div className="p-4 space-y-6">
           {/* 表示方式 */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <fieldset>
+            <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
               📖 表示方式
-            </h3>
-            <div className="space-y-2">
+            </legend>
+            <div className="space-y-2" role="radiogroup">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -97,14 +106,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <span className="text-gray-700 dark:text-gray-300">見開きページ</span>
               </label>
             </div>
-          </div>
+          </fieldset>
 
           {/* 読み方向 */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <fieldset>
+            <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
               📚 読み方向
-            </h3>
-            <div className="space-y-2">
+            </legend>
+            <div className="space-y-2" role="radiogroup">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -126,14 +135,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <span className="text-gray-700 dark:text-gray-300">左→右（英語）</span>
               </label>
             </div>
-          </div>
+          </fieldset>
 
           {/* テーマ（将来実装） */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <fieldset>
+            <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
               🌙 テーマ
-            </h3>
-            <div className="space-y-2">
+            </legend>
+            <div className="space-y-2" role="radiogroup">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
@@ -155,13 +164,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <span className="text-gray-400 dark:text-gray-500">ダーク（システム設定に従う）</span>
               </label>
             </div>
-          </div>
+          </fieldset>
 
           {/* 見開き設定 */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <fieldset>
+            <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
               🏷️ 見開き設定
-            </h3>
+            </legend>
             <div className="space-y-2">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
@@ -177,7 +186,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 OFF: 1ページ目から見開き表示
               </p>
             </div>
-          </div>
+          </fieldset>
         </div>
 
         {/* フッター */}
