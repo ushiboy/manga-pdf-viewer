@@ -23,7 +23,11 @@ export const PWAUpdateNotification: React.FC = () => {
   return (
     <>
       {(offlineReady || needRefresh) && (
-        <div className="fixed top-4 right-4 z-50 w-80 max-w-[calc(100vw-2rem)]">
+        <div 
+          className="fixed top-4 right-4 z-50 w-80 max-w-[calc(100vw-2rem)]"
+          role="alert"
+          aria-live="polite"
+        >
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -57,6 +61,7 @@ export const PWAUpdateNotification: React.FC = () => {
                   {needRefresh && (
                     <button
                       onClick={() => updateServiceWorker(true)}
+                      aria-label="アプリを更新する"
                       className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-medium transition-colors"
                     >
                       更新
@@ -64,6 +69,7 @@ export const PWAUpdateNotification: React.FC = () => {
                   )}
                   <button
                     onClick={close}
+                    aria-label="通知を閉じる"
                     className="text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded font-medium transition-colors"
                   >
                     閉じる
