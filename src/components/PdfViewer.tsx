@@ -458,14 +458,26 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   // ローディング状態
   if (loadState.isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div 
+        className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+        role="status"
+        aria-live="polite"
+        aria-label="PDF読み込み中"
+      >
         <div className="text-center">
           <LoadingSpinner size="lg" className="mb-4" />
           <p className="text-gray-600 dark:text-gray-400 mb-2">
             PDFを読み込んでいます...
           </p>
           {loadState.progress > 0 && (
-            <div className="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div 
+              className="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2"
+              role="progressbar"
+              aria-valuenow={loadState.progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`読み込み進行状況 ${loadState.progress}%`}
+            >
               <div
                 className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${loadState.progress}%` }}
@@ -480,9 +492,16 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   // エラー状態
   if (loadState.error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div 
+        className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+        role="alert"
+        aria-label="PDF読み込みエラー"
+      >
         <div className="text-center">
-          <div className="w-32 h-32 mx-auto mb-4 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
+          <div 
+            className="w-32 h-32 mx-auto mb-4 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center"
+            aria-hidden="true"
+          >
             <span className="text-6xl">⚠️</span>
           </div>
           <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">
@@ -499,9 +518,16 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   // PDF未選択状態
   if (!pdfDocument) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div 
+        className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+        role="main"
+        aria-label="PDFファイル選択画面"
+      >
         <div className="text-center">
-          <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+          <div 
+            className="w-32 h-32 mx-auto mb-4 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center"
+            aria-hidden="true"
+          >
             <span className="text-6xl">📚</span>
           </div>
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -510,7 +536,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             PDFファイルを選択してください
           </p>
-          <div className="space-y-2 text-sm text-gray-400 dark:text-gray-500">
+          <div 
+            className="space-y-2 text-sm text-gray-400 dark:text-gray-500"
+            role="region"
+            aria-label="操作方法"
+          >
             <p>ドラッグ&ドロップまたはファイル選択ボタンから読み込み</p>
             <p>キーボード: ←→（ページめくり）、F11（フルスクリーン）</p>
             <p>マウス: クリック（ページめくり）、ホイール（ズーム）</p>
@@ -683,6 +713,9 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       className={`flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800 relative overflow-hidden ${
         zoomState && zoomState.fitMode === 'custom' ? 'cursor-grab' : 'cursor-pointer'
       }`}
+      role="main"
+      aria-label={`PDFビューワー ページ ${currentPage} / ${pdfDocument.numPages} ${viewMode === 'spread' ? '見開き表示' : '単ページ表示'}`}
+      tabIndex={0}
       onClick={handleClick}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -693,14 +726,32 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       onTouchEnd={handleTouchEnd}
     >
       {renderError ? (
-        <div className="text-center">
-          <div className="text-4xl mb-2 text-red-500">⚠️</div>
+        <div 
+          className="text-center"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div 
+            className="text-4xl mb-2 text-red-500"
+            aria-hidden="true"
+          >
+            ⚠️
+          </div>
           <p className="text-red-600 dark:text-red-400">{renderError}</p>
         </div>
       ) : (
-        <div className={`relative ${viewMode === 'spread' ? 'flex' : ''}`}>
+        <div 
+          className={`relative ${viewMode === 'spread' ? 'flex' : ''}`}
+          role="region"
+          aria-label="PDF表示領域"
+        >
           {isRendering && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 z-10">
+            <div 
+              className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 z-10"
+              role="status"
+              aria-live="polite"
+              aria-label="ページレンダリング中"
+            >
               <LoadingSpinner size="md" />
             </div>
           )}
@@ -709,11 +760,15 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
             className={`shadow-lg border border-gray-200 dark:border-gray-600 bg-white pointer-events-none ${
               viewMode === 'spread' ? 'max-w-none' : 'max-w-full max-h-full'
             }`}
+            role="img"
+            aria-label={viewMode === 'spread' ? `左ページ ${readingDirection === 'rtl' ? currentPage + 1 : currentPage}` : `ページ ${currentPage}`}
           />
           <canvas
             ref={rightCanvasRef}
             className="shadow-lg border border-gray-200 dark:border-gray-600 bg-white pointer-events-none max-w-none"
             style={{ display: viewMode === 'spread' ? 'block' : 'none' }}
+            role="img"
+            aria-label={`右ページ ${readingDirection === 'rtl' ? currentPage : currentPage + 1}`}
           />
         </div>
       )}
