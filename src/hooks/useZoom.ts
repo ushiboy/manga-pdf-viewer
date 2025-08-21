@@ -29,6 +29,7 @@ export const useZoom = () => {
   const setFitMode = useCallback((fitMode: FitMode) => {
     setZoomState(prev => ({
       ...prev,
+      scale: fitMode === 'custom' ? prev.scale : 1.0, // customでない場合はscaleをリセット
       fitMode,
       offsetX: 0,
       offsetY: 0,
@@ -52,11 +53,14 @@ export const useZoom = () => {
 
   const zoomIn = useCallback((currentDisplayScale?: number) => {
     setZoomState(prev => {
-      let baseScale = prev.scale;
+      let baseScale;
       
-      // fitModeがcustom以外の場合は、現在表示されている倍率を基準にする
-      if (prev.fitMode !== 'custom' && currentDisplayScale) {
-        baseScale = currentDisplayScale;
+      if (prev.fitMode === 'custom') {
+        // カスタムモードの場合は現在のスケールを基準にする
+        baseScale = prev.scale;
+      } else {
+        // フィットモードの場合は、提供されたスケールまたは1.0を基準にする
+        baseScale = currentDisplayScale || 1.0;
       }
       
       const newScale = baseScale * 1.25;
@@ -77,11 +81,14 @@ export const useZoom = () => {
 
   const zoomOut = useCallback((currentDisplayScale?: number) => {
     setZoomState(prev => {
-      let baseScale = prev.scale;
+      let baseScale;
       
-      // fitModeがcustom以外の場合は、現在表示されている倍率を基準にする
-      if (prev.fitMode !== 'custom' && currentDisplayScale) {
-        baseScale = currentDisplayScale;
+      if (prev.fitMode === 'custom') {
+        // カスタムモードの場合は現在のスケールを基準にする
+        baseScale = prev.scale;
+      } else {
+        // フィットモードの場合は、提供されたスケールまたは1.0を基準にする
+        baseScale = currentDisplayScale || 1.0;
       }
       
       const newScale = baseScale / 1.25;
@@ -103,6 +110,7 @@ export const useZoom = () => {
   const resetZoom = useCallback(() => {
     setZoomState(prev => ({
       ...prev,
+      scale: 1.0, // scaleもリセット
       fitMode: 'page',
       offsetX: 0,
       offsetY: 0,

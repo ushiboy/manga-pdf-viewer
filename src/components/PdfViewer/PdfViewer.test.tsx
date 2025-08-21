@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { PdfViewer } from './PdfViewer';
-import type { PdfDocument, PdfLoadState } from '../types/pdf';
-import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../types/settings';
+import type { PdfDocument, PdfLoadState } from '../../types/pdf';
+import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../../types/settings';
 
 // Mock PDF.js page object
 const mockPdfPage = {
