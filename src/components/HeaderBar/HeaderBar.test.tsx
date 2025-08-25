@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HeaderBar } from './HeaderBar';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import type { ViewMode, ReadingDirection } from '../../types/settings';
 
 describe('HeaderBar', () => {
   const defaultProps = {

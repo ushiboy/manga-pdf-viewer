@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { HeaderBar } from "./HeaderBar";
-import { FooterBar } from "./FooterBar";
-import { FloatingShowButton } from "./FloatingShowButton";
-import { SettingsPanel } from "./SettingsPanel";
-import type { ViewMode, ReadingDirection } from "../types/settings";
+import { HeaderBar } from "../HeaderBar";
+import { FooterBar } from "../FooterBar";
+import { FloatingShowButton } from "../FloatingShowButton";
+import { SettingsPanel } from "../SettingsPanel";
+import type { ViewMode, ReadingDirection } from "../../types/settings";
 
 interface OverlayUIProps {
   currentPage: number;
