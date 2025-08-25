@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { Button } from './ui/Button';
-import type { ViewMode, ReadingDirection } from '../types/settings';
+import { Button } from '../ui/Button';
+import type { ViewMode, ReadingDirection } from '../../types/settings';
 
 interface HeaderBarProps {
   isVisible: boolean;
