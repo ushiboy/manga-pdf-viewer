@@ -1,48 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { useTouch } from '../../hooks/useTouch';
+import { useAppContext } from '../../contexts';
 import type { PdfDocument } from '../../types/pdf';
-import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../../types/settings';
 
 interface PdfCanvasProps {
   pdfDocument: PdfDocument;
-  currentPage: number;
-  isUIVisible: boolean;
-  viewMode: ViewMode;
-  readingDirection: ReadingDirection;
-  treatFirstPageAsCover: boolean;
-  zoomState?: ZoomState;
-  calculateFitScale?: (
-    pageWidth: number,
-    pageHeight: number,
-    containerWidth: number,
-    containerHeight: number,
-    fitMode: FitMode
-  ) => number;
-  onPageChange?: (page: number) => void;
-  onPreviousPage?: () => void;
-  onNextPage?: () => void;
-  onZoomIn?: (currentDisplayScale?: number) => void;
-  onZoomOut?: (currentDisplayScale?: number) => void;
-  onPan?: (deltaX: number, deltaY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => void;
 }
 
-export const PdfCanvas: React.FC<PdfCanvasProps> = ({
-  pdfDocument,
-  currentPage,
-  isUIVisible,
-  viewMode,
-  readingDirection,
-  treatFirstPageAsCover,
-  zoomState,
-  calculateFitScale,
-  onPageChange,
-  onPreviousPage,
-  onNextPage,
-  onZoomIn,
-  onZoomOut,
-  onPan
-}) => {
+export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
+  const {
+    currentPage,
+    isUIVisible,
+    viewMode,
+    readingDirection,
+    treatFirstPageAsCover,
+    zoomState,
+    calculateFitScale,
+    handlePageChange,
+    goToPreviousPage,
+    goToNextPage,
+    handleZoomIn,
+    handleZoomOut,
+    handlePan
+  } = useAppContext();
   const leftCanvasRef = useRef<HTMLCanvasElement>(null);
   const rightCanvasRef = useRef<HTMLCanvasElement>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
@@ -59,16 +40,12 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
   }>({});
 
   const handleTouchPreviousPage = React.useCallback(() => {
-    if (onPreviousPage) {
-      onPreviousPage();
-    }
-  }, [onPreviousPage]);
+    goToPreviousPage();
+  }, [goToPreviousPage]);
 
   const handleTouchNextPage = React.useCallback(() => {
-    if (onNextPage) {
-      onNextPage();
-    }
-  }, [onNextPage]);
+    goToNextPage();
+  }, [goToNextPage]);
 
   const { handleTouchStart, handleTouchMove, handleTouchEnd, updatePanPosition } = useTouch({
     enabled: true,
@@ -77,12 +54,10 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
     isZoomed: zoomState?.fitMode === 'custom',
     onPreviousPage: handleTouchPreviousPage,
     onNextPage: handleTouchNextPage,
-    onZoomIn,
-    onZoomOut,
+    onZoomIn: handleZoomIn,
+    onZoomOut: handleZoomOut,
     onPan: (deltaX, deltaY) => {
-      if (onPan) {
-        onPan(deltaX, deltaY);
-      }
+      handlePan(deltaX, deltaY);
     },
   });
 
@@ -318,7 +293,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
   // Mouse and pan interaction logic
   useEffect(() => {
     const handleGlobalMouseMove = (event: MouseEvent) => {
-      if (!isDragging || !onPan || !zoomState || zoomState.fitMode !== 'custom') return;
+      if (!isDragging || !handlePan || !zoomState || zoomState.fitMode !== 'custom') return;
       
       const deltaX = event.clientX - dragStart.x;
       const deltaY = event.clientY - dragStart.y;
@@ -328,7 +303,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
         const containerRect = canvas?.parentElement?.getBoundingClientRect();
         
         if (containerRect && canvas) {
-          onPan(
+          handlePan(
             deltaX - lastPanPosition.x,
             deltaY - lastPanPosition.y,
             containerRect.width,
@@ -360,7 +335,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDragging, dragStart, lastPanPosition, onPan, zoomState, pdfDocument, viewMode, isUIVisible]);
+  }, [isDragging, dragStart, lastPanPosition, handlePan, zoomState, pdfDocument, viewMode, isUIVisible]);
 
   // Wheel event handling with non-passive listener
   useEffect(() => {
@@ -371,12 +346,12 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
       event.preventDefault();
     
       // ズームイン/ズームアウトの処理
-      if (event.deltaY < 0 && onZoomIn) {
+      if (event.deltaY < 0 && handleZoomIn) {
         // ズームイン - パラメータなしで呼び出す（useZoom内で自動計算）
-        onZoomIn();
-      } else if (event.deltaY > 0 && onZoomOut) {
+        handleZoomIn();
+      } else if (event.deltaY > 0 && handleZoomOut) {
         // ズームアウト - パラメータなしで呼び出す（useZoom内で自動計算）
-        onZoomOut();
+        handleZoomOut();
       }
     };
 
@@ -386,7 +361,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
     return () => {
       viewerContainer.removeEventListener('wheel', handleWheel);
     };
-  }, [zoomState, onZoomIn, onZoomOut, calculateFitScale]);
+  }, [zoomState, handleZoomIn, handleZoomOut, calculateFitScale]);
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     if (zoomState?.fitMode === 'custom') {
@@ -398,7 +373,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging && onPan && zoomState?.fitMode === 'custom') {
+    if (isDragging && handlePan && zoomState?.fitMode === 'custom') {
       const deltaX = event.clientX - dragStart.x;
       const deltaY = event.clientY - dragStart.y;
       
@@ -407,7 +382,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
         const containerRect = canvas?.parentElement?.getBoundingClientRect();
         
         if (containerRect && canvas) {
-          onPan(
+          handlePan(
             deltaX - lastPanPosition.x,
             deltaY - lastPanPosition.y,
             containerRect.width,
@@ -430,7 +405,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
   };
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging || !onPageChange || zoomState?.fitMode === 'custom') return;
+    if (isDragging || !handlePageChange || zoomState?.fitMode === 'custom') return;
     
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -439,15 +414,15 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
     if (viewMode === 'single') {
       if (readingDirection === 'rtl') {
         if (clickPosition > 0.5 && currentPage < pdfDocument.numPages) {
-          onPageChange(currentPage + 1);
+          handlePageChange(currentPage + 1);
         } else if (clickPosition <= 0.5 && currentPage > 1) {
-          onPageChange(currentPage - 1);
+          handlePageChange(currentPage - 1);
         }
       } else {
         if (clickPosition > 0.5 && currentPage < pdfDocument.numPages) {
-          onPageChange(currentPage + 1);
+          handlePageChange(currentPage + 1);
         } else if (clickPosition <= 0.5 && currentPage > 1) {
-          onPageChange(currentPage - 1);
+          handlePageChange(currentPage - 1);
         }
       }
     } else {
@@ -457,26 +432,26 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
             ? currentPage + 1 
             : currentPage + 2;
           if (nextPage <= pdfDocument.numPages) {
-            onPageChange(nextPage);
+            handlePageChange(nextPage);
           }
         } else {
           const prevPage = treatFirstPageAsCover && currentPage <= 2
             ? 1
             : currentPage - 2;
           if (prevPage >= 1) {
-            onPageChange(prevPage);
+            handlePageChange(prevPage);
           }
         }
       } else {
         if (clickPosition > 0.5) {
           const nextPage = currentPage + 2;
           if (nextPage <= pdfDocument.numPages) {
-            onPageChange(nextPage);
+            handlePageChange(nextPage);
           }
         } else {
           const prevPage = currentPage - 2;
           if (prevPage >= 1) {
-            onPageChange(prevPage);
+            handlePageChange(prevPage);
           }
         }
       }

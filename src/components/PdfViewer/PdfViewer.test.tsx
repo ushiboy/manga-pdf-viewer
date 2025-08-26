@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { PdfViewer } from './PdfViewer';
+import { useAppContext } from '../../contexts';
 import type { PdfDocument, PdfLoadState } from '../../types/pdf';
 import type { ViewMode, ReadingDirection, ZoomState, FitMode } from '../../types/settings';
 
@@ -24,21 +25,65 @@ const mockPdfDocument: PdfDocument = {
   numPages: 10,
 };
 
+// Mock the useAppContext hook
+vi.mock('../../contexts', () => ({
+  useAppContext: vi.fn(),
+}));
+
+const mockUseAppContext = vi.mocked(useAppContext);
+
 describe('PdfViewer', () => {
-  const defaultProps = {
+  const defaultContextValue = {
+    // PDF関連
     pdfDocument: mockPdfDocument,
     loadState: { isLoading: false, error: null, progress: 0, isLoaded: false } as PdfLoadState,
+    loadPdf: vi.fn(),
+    
+    // ページ関連
     currentPage: 1,
+    handlePageChange: vi.fn(),
+    goToPreviousPage: vi.fn(),
+    goToNextPage: vi.fn(),
+    goToFirstPage: vi.fn(),
+    goToLastPage: vi.fn(),
+    
+    // UI状態
     isUIVisible: true,
+    showUI: vi.fn(),
+    hideUI: vi.fn(),
+    
+    // 設定関連
     viewMode: 'single' as ViewMode,
     readingDirection: 'rtl' as ReadingDirection,
     treatFirstPageAsCover: true,
-    onPageChange: vi.fn(),
-    onPreviousPage: vi.fn(),
-    onNextPage: vi.fn(),
-    onZoomIn: vi.fn(),
-    onZoomOut: vi.fn(),
-    onPan: vi.fn(),
+    toggleViewMode: vi.fn(),
+    toggleReadingDirection: vi.fn(),
+    toggleTreatFirstPageAsCover: vi.fn(),
+    resetToDefaults: vi.fn(),
+    
+    // ズーム関連
+    zoomState: {
+      scale: 1.5,
+      fitMode: 'width' as FitMode,
+      offsetX: 0,
+      offsetY: 0,
+      minScale: 0.1,
+      maxScale: 5.0,
+    },
+    calculateFitScale: vi.fn(() => 1),
+    handleZoomIn: vi.fn(),
+    handleZoomOut: vi.fn(),
+    cycleFitMode: vi.fn(),
+    handlePan: vi.fn(),
+    
+    // フルスクリーン関連
+    isFullscreen: false,
+    toggleFullscreen: vi.fn(),
+    
+    // ファイル操作関連
+    handleFileSelect: vi.fn(),
+    handleDragOver: vi.fn(),
+    handleDrop: vi.fn(),
   };
 
   const mockZoomState: ZoomState = {
@@ -60,6 +105,9 @@ describe('PdfViewer', () => {
       promise: Promise.resolve(),
       cancel: vi.fn(),
     });
+    
+    // Set default mock context value
+    mockUseAppContext.mockReturnValue(defaultContextValue);
   });
 
   afterEach(() => {
@@ -68,10 +116,12 @@ describe('PdfViewer', () => {
 
   describe('Loading State', () => {
     it('should render loading spinner when isLoading is true', () => {
-      const loadState = { isLoading: true, error: null, progress: 0, isLoaded: false };
-      const { getByText, getByRole } = render(
-        <PdfViewer {...defaultProps} loadState={loadState} />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        loadState: { isLoading: true, error: null, progress: 0, isLoaded: false },
+      });
+      
+      const { getByText, getByRole } = render(<PdfViewer />);
       
       expect(getByRole('status', { name: 'PDF読み込み中' })).toBeInTheDocument();
       expect(getByText('PDFを読み込んでいます...')).toBeInTheDocument();
@@ -81,10 +131,12 @@ describe('PdfViewer', () => {
     });
 
     it('should render progress bar when loading with progress', () => {
-      const loadState = { isLoading: true, error: null, progress: 50, isLoaded: false };
-      const { getByRole } = render(
-        <PdfViewer {...defaultProps} loadState={loadState} />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        loadState: { isLoading: true, error: null, progress: 50, isLoaded: false },
+      });
+      
+      const { getByRole } = render(<PdfViewer />);
       
       const progressBar = getByRole('progressbar', { name: '読み込み進行状況 50%' });
       expect(progressBar).toBeInTheDocument();
@@ -96,10 +148,12 @@ describe('PdfViewer', () => {
 
   describe('Error State', () => {
     it('should render error message when loadState has error', () => {
-      const loadState = { isLoading: false, error: 'ファイルが見つかりません', progress: 0, isLoaded: false };
-      const { getByText } = render(
-        <PdfViewer {...defaultProps} loadState={loadState} />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        loadState: { isLoading: false, error: 'ファイルが見つかりません', progress: 0, isLoaded: false },
+      });
+      
+      const { getByText } = render(<PdfViewer />);
       
       expect(getByText('エラー')).toBeInTheDocument();
       expect(getByText('ファイルが見つかりません')).toBeInTheDocument();
@@ -108,9 +162,12 @@ describe('PdfViewer', () => {
 
   describe('No Document State', () => {
     it('should render file selection prompt when pdfDocument is null', () => {
-      const { getByText } = render(
-        <PdfViewer {...defaultProps} pdfDocument={null} />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        pdfDocument: null,
+      });
+      
+      const { getByText } = render(<PdfViewer />);
       
       expect(getByText('漫画本PDFビューワー')).toBeInTheDocument();
       expect(getByText('PDFファイルを選択してください')).toBeInTheDocument();
@@ -120,9 +177,7 @@ describe('PdfViewer', () => {
 
   describe('PDF Rendering', () => {
     it('should render PDF display area', () => {
-      const { getByRole } = render(
-        <PdfViewer {...defaultProps} />
-      );
+      const { getByRole } = render(<PdfViewer />);
       
       const pdfViewer = getByRole('main', { name: /PDFビューワー ページ 1 \/ 10/ });
       expect(pdfViewer).toBeInTheDocument();
@@ -132,18 +187,24 @@ describe('PdfViewer', () => {
     });
 
     it('should show single page layout in single view mode', () => {
-      const { getByRole } = render(
-        <PdfViewer {...defaultProps} viewMode="single" />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        viewMode: 'single',
+      });
+      
+      const { getByRole } = render(<PdfViewer />);
       
       const pdfViewer = getByRole('main', { name: /単ページ表示/ });
       expect(pdfViewer).toBeInTheDocument();
     });
 
     it('should show spread layout in spread view mode', () => {
-      const { getByRole } = render(
-        <PdfViewer {...defaultProps} viewMode="spread" />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        viewMode: 'spread',
+      });
+      
+      const { getByRole } = render(<PdfViewer />);
       
       const pdfViewer = getByRole('main', { name: /見開き表示/ });
       expect(pdfViewer).toBeInTheDocument();
@@ -152,13 +213,20 @@ describe('PdfViewer', () => {
 
   describe('View Mode Changes', () => {
     it('should update aria-label when viewMode changes from single to spread', () => {
-      const { getByRole, rerender } = render(
-        <PdfViewer {...defaultProps} viewMode="single" />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        viewMode: 'single',
+      });
       
+      const { getByRole, rerender } = render(<PdfViewer />);
       expect(getByRole('main', { name: /単ページ表示/ })).toBeInTheDocument();
       
-      rerender(<PdfViewer {...defaultProps} viewMode="spread" />);
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        viewMode: 'spread',
+      });
+      
+      rerender(<PdfViewer />);
       
       expect(getByRole('main', { name: /見開き表示/ })).toBeInTheDocument();
     });
@@ -167,39 +235,39 @@ describe('PdfViewer', () => {
   describe('Zoom Functionality', () => {
     it('should show grab cursor when in custom zoom mode', () => {
       const customZoomState = { ...mockZoomState, fitMode: 'custom' as FitMode };
-      const { container } = render(
-        <PdfViewer 
-          {...defaultProps} 
-          zoomState={customZoomState}
-          calculateFitScale={mockCalculateFitScale}
-        />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        zoomState: customZoomState,
+        calculateFitScale: mockCalculateFitScale,
+      });
+      
+      const { container } = render(<PdfViewer />);
       
       const viewerContainer = container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass('cursor-grab');
     });
 
     it('should show pointer cursor when not in custom zoom mode', () => {
-      const { container } = render(
-        <PdfViewer 
-          {...defaultProps} 
-          zoomState={mockZoomState}
-          calculateFitScale={mockCalculateFitScale}
-        />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        zoomState: mockZoomState,
+        calculateFitScale: mockCalculateFitScale,
+      });
+      
+      const { container } = render(<PdfViewer />);
       
       const viewerContainer = container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass('cursor-pointer');
     });
 
     it('should accept zoom-related props', () => {
-      const { getByRole } = render(
-        <PdfViewer 
-          {...defaultProps} 
-          zoomState={mockZoomState}
-          calculateFitScale={mockCalculateFitScale}
-        />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        zoomState: mockZoomState,
+        calculateFitScale: mockCalculateFitScale,
+      });
+      
+      const { getByRole } = render(<PdfViewer />);
       
       const pdfViewer = getByRole('main', { name: /PDFビューワー/ });
       expect(pdfViewer).toBeInTheDocument();
@@ -208,9 +276,12 @@ describe('PdfViewer', () => {
 
   describe('Click Navigation', () => {
     it('should render clickable area for navigation', () => {
-      const { container } = render(
-        <PdfViewer {...defaultProps} viewMode="single" />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        viewMode: 'single',
+      });
+      
+      const { container } = render(<PdfViewer />);
       
       const viewerContainer = container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass('cursor-pointer');
@@ -218,13 +289,13 @@ describe('PdfViewer', () => {
 
     it('should not show click cursor when in custom zoom mode', () => {
       const customZoomState = { ...mockZoomState, fitMode: 'custom' as FitMode };
-      const { container } = render(
-        <PdfViewer 
-          {...defaultProps} 
-          zoomState={customZoomState}
-          calculateFitScale={mockCalculateFitScale}
-        />
-      );
+      mockUseAppContext.mockReturnValue({
+        ...defaultContextValue,
+        zoomState: customZoomState,
+        calculateFitScale: mockCalculateFitScale,
+      });
+      
+      const { container } = render(<PdfViewer />);
       
       const viewerContainer = container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass('cursor-grab');

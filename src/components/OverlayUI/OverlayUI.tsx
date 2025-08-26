@@ -3,59 +3,33 @@ import { HeaderBar } from "../HeaderBar";
 import { FooterBar } from "../FooterBar";
 import { FloatingShowButton } from "../FloatingShowButton";
 import { SettingsPanel } from "../SettingsPanel";
-import type { ViewMode, ReadingDirection } from "../../types/settings";
-
-interface OverlayUIProps {
-  currentPage: number;
-  totalPages: number;
-  isVisible: boolean;
-  onFileSelect: (file: File) => void;
-  onShow: () => void;
-  onHide: () => void;
-  onPageChange: (page: number) => void;
-  onPreviousPage?: () => void;
-  onNextPage?: () => void;
-  viewMode: ViewMode;
-  readingDirection: ReadingDirection;
-  treatFirstPageAsCover: boolean;
-  onToggleViewMode: () => void;
-  onToggleReadingDirection: () => void;
-  onToggleTreatFirstPageAsCover: () => void;
-  onResetSettings: () => void;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
-  onToggleFitMode?: () => void;
-  onGoToFirst?: () => void;
-  onGoToLast?: () => void;
-  isFullscreen?: boolean;
-  onToggleFullscreen?: () => void;
-}
-
-export const OverlayUI: React.FC<OverlayUIProps> = ({
-  currentPage,
-  totalPages,
-  isVisible,
-  onFileSelect,
-  onShow,
-  onHide,
-  onPageChange,
-  onPreviousPage,
-  onNextPage,
-  viewMode,
-  readingDirection,
-  treatFirstPageAsCover,
-  onToggleViewMode,
-  onToggleReadingDirection,
-  onToggleTreatFirstPageAsCover,
-  onResetSettings,
-  onZoomIn,
-  onZoomOut,
-  onToggleFitMode,
-  onGoToFirst,
-  onGoToLast,
-  isFullscreen = false,
-  onToggleFullscreen,
-}) => {
+import { useAppContext } from "../../contexts";
+export const OverlayUI: React.FC = () => {
+  const {
+    pdfDocument,
+    currentPage,
+    isUIVisible,
+    viewMode,
+    readingDirection,
+    treatFirstPageAsCover,
+    handleFileSelect,
+    showUI,
+    hideUI,
+    handlePageChange,
+    goToPreviousPage,
+    goToNextPage,
+    toggleViewMode,
+    toggleReadingDirection,
+    toggleTreatFirstPageAsCover,
+    resetToDefaults,
+    handleZoomIn,
+    handleZoomOut,
+    cycleFitMode,
+    goToFirstPage,
+    goToLastPage,
+    isFullscreen,
+    toggleFullscreen,
+  } = useAppContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleOpenSettings = () => {
@@ -68,33 +42,33 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
 
   return (
     <>
-      <FloatingShowButton isVisible={isVisible} onShow={onShow} />
+      <FloatingShowButton isVisible={isUIVisible} onShow={showUI} />
       <HeaderBar
-        isVisible={isVisible}
-        onFileSelect={onFileSelect}
-        onHide={onHide}
+        isVisible={isUIVisible}
+        onFileSelect={handleFileSelect}
+        onHide={hideUI}
         viewMode={viewMode}
         readingDirection={readingDirection}
-        onToggleViewMode={onToggleViewMode}
-        onToggleReadingDirection={onToggleReadingDirection}
+        onToggleViewMode={toggleViewMode}
+        onToggleReadingDirection={toggleReadingDirection}
         isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
+        onToggleFullscreen={toggleFullscreen}
         onOpenSettings={handleOpenSettings}
       />
       <FooterBar
-        isVisible={isVisible}
+        isVisible={isUIVisible}
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalPages={pdfDocument?.numPages || 0}
         viewMode={viewMode}
         readingDirection={readingDirection}
-        onPageChange={onPageChange}
-        onPreviousPage={onPreviousPage}
-        onNextPage={onNextPage}
-        onZoomIn={onZoomIn}
-        onZoomOut={onZoomOut}
-        onToggleFitMode={onToggleFitMode}
-        onGoToFirst={onGoToFirst}
-        onGoToLast={onGoToLast}
+        onPageChange={handlePageChange}
+        onPreviousPage={goToPreviousPage}
+        onNextPage={goToNextPage}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onToggleFitMode={cycleFitMode}
+        onGoToFirst={goToFirstPage}
+        onGoToLast={goToLastPage}
       />
       <SettingsPanel
         isOpen={isSettingsOpen}
@@ -102,10 +76,10 @@ export const OverlayUI: React.FC<OverlayUIProps> = ({
         viewMode={viewMode}
         readingDirection={readingDirection}
         treatFirstPageAsCover={treatFirstPageAsCover}
-        onToggleViewMode={onToggleViewMode}
-        onToggleReadingDirection={onToggleReadingDirection}
-        onToggleTreatFirstPageAsCover={onToggleTreatFirstPageAsCover}
-        onResetSettings={onResetSettings}
+        onToggleViewMode={toggleViewMode}
+        onToggleReadingDirection={toggleReadingDirection}
+        onToggleTreatFirstPageAsCover={toggleTreatFirstPageAsCover}
+        onResetSettings={resetToDefaults}
       />
     </>
   );
