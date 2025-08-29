@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useKeyboard } from './useKeyboard';
+import type { ReadingDirection } from '../types/settings';
 
 // Helper function to create mock event
 const createKeyboardEvent = (key: string, target?: Partial<Element>) => {
@@ -26,7 +27,7 @@ describe('useKeyboard', () => {
     onNextPage: mockOnNextPage,
     onFullscreen: mockOnFullscreen,
     enabled: true,
-    readingDirection: 'rtl' as const,
+    readingDirection: 'rtl' as ReadingDirection,
     onZoomIn: mockOnZoomIn,
     onZoomOut: mockOnZoomOut,
   };
@@ -122,8 +123,7 @@ describe('useKeyboard', () => {
     });
 
     it('should not call onFullscreen when F11 is pressed and onFullscreen is not provided', () => {
-      const propsWithoutFullscreen = { ...defaultProps };
-      delete propsWithoutFullscreen.onFullscreen;
+      const propsWithoutFullscreen = { ...defaultProps, onFullscreen: undefined };
 
       renderHook(() => useKeyboard(propsWithoutFullscreen));
 
@@ -268,12 +268,12 @@ describe('useKeyboard', () => {
 
       const { rerender } = renderHook(
         (props) => useKeyboard(props),
-        { initialProps: { ...defaultProps, readingDirection: 'rtl' as const } }
+        { initialProps: { ...defaultProps, readingDirection: 'rtl' as ReadingDirection } }
       );
 
       expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
 
-      rerender({ ...defaultProps, readingDirection: 'ltr' as const });
+      rerender({ ...defaultProps, readingDirection: 'ltr' as ReadingDirection });
 
       expect(removeEventListenerSpy).toHaveBeenCalledTimes(1);
       expect(addEventListenerSpy).toHaveBeenCalledTimes(2);
