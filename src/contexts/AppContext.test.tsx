@@ -9,6 +9,7 @@ vi.mock('../hooks/usePdfDocument', () => ({
     pdfDocument: null,
     loadState: { isLoading: false, error: null, progress: 0, isLoaded: false },
     loadPdf: vi.fn(),
+    clearPdf: vi.fn(),
   })),
 }));
 
@@ -153,6 +154,7 @@ describe('AppContext', () => {
         pdfDocument: mockPdfDocument,
         loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
         loadPdf: vi.fn(),
+        clearPdf: vi.fn(),
       });
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -194,6 +196,7 @@ describe('AppContext', () => {
         pdfDocument: null,
         loadState: { isLoading: false, error: null, progress: 0, isLoaded: false },
         loadPdf: mockLoadPdf,
+        clearPdf: vi.fn(),
       });
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -283,6 +286,7 @@ describe('AppContext', () => {
         pdfDocument: mockPdfDocument,
         loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
         loadPdf: vi.fn(),
+        clearPdf: vi.fn(),
       });
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -335,6 +339,7 @@ describe('AppContext', () => {
         pdfDocument: mockPdfDocument,
         loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
         loadPdf: vi.fn(),
+        clearPdf: vi.fn(),
       });
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (

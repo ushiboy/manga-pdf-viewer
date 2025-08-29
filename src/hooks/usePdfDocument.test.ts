@@ -9,7 +9,7 @@ vi.mock('../utils/pdfWorker', () => ({
   },
 }));
 
-const mockPdfjsLib = vi.mocked(await import('../utils/pdfWorker')).default;
+const mockGetDocument = vi.mocked((await import('../utils/pdfWorker')).default.getDocument);
 
 // Mock console.error to avoid noise in tests
 const originalConsoleError = console.error;
@@ -51,9 +51,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask = {
       promise: Promise.resolve(mockPdf),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const { result } = renderHook(() => usePdfDocument());
 
@@ -85,9 +85,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask = {
       promise: Promise.resolve(mockPdf),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const { result } = renderHook(() => usePdfDocument());
 
@@ -113,9 +113,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask = {
       promise: Promise.resolve(mockPdf),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const { result } = renderHook(() => usePdfDocument());
 
@@ -142,9 +142,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask = {
       promise: Promise.reject(error),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const { result } = renderHook(() => usePdfDocument());
 
@@ -171,8 +171,8 @@ describe('usePdfDocument', () => {
     let mockLoadingTask = {
       promise: Promise.reject(invalidPdfError),
       onProgress: null as any,
-    };
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    } as any;
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const pdfFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
 
@@ -187,8 +187,8 @@ describe('usePdfDocument', () => {
     mockLoadingTask = {
       promise: Promise.reject(encryptedError),
       onProgress: null as any,
-    };
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    } as any;
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     await act(async () => {
       await result.current.loadPdf(pdfFile);
@@ -201,8 +201,8 @@ describe('usePdfDocument', () => {
     mockLoadingTask = {
       promise: Promise.reject(networkError),
       onProgress: null as any,
-    };
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    } as any;
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     await act(async () => {
       await result.current.loadPdf(pdfFile);
@@ -220,9 +220,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask2 = {
       promise: Promise.resolve(mockPdf2),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask2);
+    mockGetDocument.mockReturnValue(mockLoadingTask2);
 
     const { result } = renderHook(() => usePdfDocument());
 
@@ -249,9 +249,9 @@ describe('usePdfDocument', () => {
     const mockLoadingTask = {
       promise: Promise.resolve(mockPdf),
       onProgress: null as any,
-    };
+    } as any;
 
-    mockPdfjsLib.getDocument.mockReturnValue(mockLoadingTask);
+    mockGetDocument.mockReturnValue(mockLoadingTask);
 
     const { result } = renderHook(() => usePdfDocument());
 
