@@ -1,0 +1,87 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.node-version }}
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results-${{ matrix.node-version }}
+          path: test-results/
+          retention-days: 7
+
+      - name: Comment PR with test results
+        uses: actions/github-script@v7
+        if: failure() && github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              // テスト結果のサマリーをPRコメントに追加
+              const comment = `## ❌ E2E Tests Failed
+              
+              E2Eテストが失敗しました。詳細は [Playwright Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) をご確認ください。
+              
+              ### アーティファクト
+              - 📊 [Playwright Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              - 📁 [Test Results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              
+              エラーの詳細はGitHub Actionsのログをご確認ください。`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Failed to post comment:', error);
+            }
