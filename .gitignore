@@ -88,6 +88,13 @@ coverage/
 tmp/
 temp/
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+/playwright-report/
+/test-results/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
