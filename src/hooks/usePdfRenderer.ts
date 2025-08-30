@@ -127,6 +127,7 @@ export const usePdfRenderer = ({
     const renderTask = page.render({
       canvasContext: context,
       viewport: scaledViewport,
+      canvas: canvas,
     });
 
     renderTasksRef.current.single = renderTask;
@@ -195,6 +196,7 @@ export const usePdfRenderer = ({
     const renderTask = page.render({
       canvasContext: context,
       viewport: scaledViewport,
+      canvas: canvas,
     });
 
     renderTasksRef.current[taskKey] = renderTask;
