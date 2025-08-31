@@ -1,4 +1,5 @@
 import React from 'react';
+import { LabelIcon } from '../icons';
 
 interface CoverModeSectionProps {
   treatFirstPageAsCover: boolean;
@@ -12,7 +13,8 @@ export const CoverModeSection: React.FC<CoverModeSectionProps> = ({
   return (
     <fieldset>
       <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-        🏷️ 見開き設定
+        <LabelIcon className="w-4 h-4 mr-2" />
+        見開き設定
       </legend>
       <div className="space-y-2">
         <label className="flex items-center space-x-3 cursor-pointer">

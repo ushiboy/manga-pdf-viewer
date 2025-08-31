@@ -30,13 +30,13 @@ describe('SettingsPanel', () => {
     it('should render when isOpen is true', () => {
       render(<SettingsPanel {...defaultProps} isOpen={true} />);
       
-      expect(screen.getByText('⚙️ 設定')).toBeInTheDocument();
+      expect(screen.getByText('設定')).toBeInTheDocument();
     });
 
     it('should not render when isOpen is false', () => {
       render(<SettingsPanel {...defaultProps} isOpen={false} />);
       
-      expect(screen.queryByText('⚙️ 設定')).not.toBeInTheDocument();
+      expect(screen.queryByText('設定')).not.toBeInTheDocument();
     });
   });
 

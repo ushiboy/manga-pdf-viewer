@@ -1,6 +1,17 @@
 import React, { useRef } from 'react';
 import { Button } from '../ui/Button';
 import type { ViewMode, ReadingDirection } from '../../types/settings';
+import {
+  CloseIcon,
+  FolderIcon,
+  SinglePageIcon,
+  SpreadPageIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  FullscreenIcon,
+  ExitFullscreenIcon,
+  SettingsIcon,
+} from '../icons';
 
 interface HeaderBarProps {
   isVisible: boolean;
@@ -57,10 +68,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             title="UI非表示"
             className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            ✕
+            <CloseIcon className="w-4 h-4" />
           </Button>
           <Button variant="secondary" size="sm" onClick={handleFileButtonClick}>
-            📁 ファイル選択
+            <FolderIcon className="w-4 h-4 mr-2" />
+            ファイル選択
           </Button>
           <input
             ref={fileInputRef}
@@ -80,7 +92,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             title={`表示方式: ${viewMode === 'single' ? '単一ページ' : '見開きページ'}`}
             onClick={onToggleViewMode}
           >
-            {viewMode === 'single' ? '📄' : '📖'}
+            {viewMode === 'single' ? 
+              <SinglePageIcon className="w-4 h-4" /> : 
+              <SpreadPageIcon className="w-4 h-4" />
+            }
           </Button>
           <Button 
             variant="ghost" 
@@ -88,7 +103,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             title={`読み方向: ${readingDirection === 'rtl' ? '右→左（日本語）' : '左→右（英語）'}`}
             onClick={onToggleReadingDirection}
           >
-            {readingDirection === 'rtl' ? '⬅️' : '➡️'}
+            {readingDirection === 'rtl' ? 
+              <ArrowLeftIcon className="w-4 h-4" /> : 
+              <ArrowRightIcon className="w-4 h-4" />
+            }
           </Button>
           <Button 
             variant="ghost" 
@@ -96,7 +114,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             title={isFullscreen ? "フルスクリーン終了 (F11)" : "フルスクリーン (F11)"}
             onClick={onToggleFullscreen}
           >
-            {isFullscreen ? '🗗' : '⛶'}
+            {isFullscreen ? 
+              <ExitFullscreenIcon className="w-4 h-4" /> : 
+              <FullscreenIcon className="w-4 h-4" />
+            }
           </Button>
           <Button 
             variant="ghost" 
@@ -104,7 +125,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             title="設定"
             onClick={onOpenSettings}
           >
-            ⚙️
+            <SettingsIcon className="w-4 h-4" />
           </Button>
         </div>
       </div>

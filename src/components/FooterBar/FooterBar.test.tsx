@@ -298,16 +298,16 @@ describe('FooterBar', () => {
   });
 
   describe('Button Icons', () => {
-    it('should display correct emoji icons', () => {
+    it('should display control buttons with correct titles', () => {
       const { getByTitle } = render(<FooterBar {...defaultProps} />);
       
-      expect(getByTitle('ズームアウト')).toHaveTextContent('➖');
-      expect(getByTitle('ズームイン')).toHaveTextContent('➕');
-      expect(getByTitle('フィット表示')).toHaveTextContent('🔍');
-      expect(getByTitle('末尾ページ')).toHaveTextContent('⏮️');
-      expect(getByTitle('次のページ')).toHaveTextContent('⬅️');
-      expect(getByTitle('前のページ')).toHaveTextContent('➡️');
-      expect(getByTitle('先頭ページ')).toHaveTextContent('⏭️');
+      expect(getByTitle('ズームアウト')).toBeInTheDocument();
+      expect(getByTitle('ズームイン')).toBeInTheDocument();
+      expect(getByTitle('フィット表示')).toBeInTheDocument();
+      expect(getByTitle('末尾ページ')).toBeInTheDocument();
+      expect(getByTitle('次のページ')).toBeInTheDocument();
+      expect(getByTitle('前のページ')).toBeInTheDocument();
+      expect(getByTitle('先頭ページ')).toBeInTheDocument();
     });
   });
 

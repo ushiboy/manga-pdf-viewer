@@ -5,6 +5,7 @@ import { useAppContext } from '../../contexts';
 import { usePdfRenderer } from '../../hooks/usePdfRenderer';
 import { useCanvasInteraction } from '../../hooks/useCanvasInteraction';
 import type { PdfDocument } from '../../types/pdf';
+import { WarningIcon } from '../icons';
 
 interface PdfCanvasProps {
   pdfDocument: PdfDocument;
@@ -103,10 +104,10 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
           aria-live="assertive"
         >
           <div 
-            className="text-4xl mb-2 text-red-500"
+            className="mb-2 text-red-500"
             aria-hidden="true"
           >
-            ⚠️
+            <WarningIcon className="w-12 h-12" />
           </div>
           <p className="text-red-600 dark:text-red-400">{renderError}</p>
         </div>
