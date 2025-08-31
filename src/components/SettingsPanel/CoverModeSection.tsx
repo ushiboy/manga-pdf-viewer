@@ -1,5 +1,5 @@
-import React from 'react';
-import { LabelIcon } from '../icons';
+import React from "react";
+import { LabelIcon } from "../icons";
 
 interface CoverModeSectionProps {
   treatFirstPageAsCover: boolean;
@@ -8,7 +8,7 @@ interface CoverModeSectionProps {
 
 export const CoverModeSection: React.FC<CoverModeSectionProps> = ({
   treatFirstPageAsCover,
-  onToggleTreatFirstPageAsCover
+  onToggleTreatFirstPageAsCover,
 }) => {
   return (
     <fieldset>
@@ -24,10 +24,13 @@ export const CoverModeSection: React.FC<CoverModeSectionProps> = ({
             onChange={onToggleTreatFirstPageAsCover}
             className="text-blue-600 focus:ring-blue-500 rounded"
           />
-          <span className="text-gray-700 dark:text-gray-300">1ページ目を表紙として単独表示</span>
+          <span className="text-gray-700 dark:text-gray-300">
+            1ページ目を表紙として単独表示
+          </span>
         </label>
         <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
-          ON: 表紙（1ページ目）は単独、2ページ目以降見開き表示<br/>
+          ON: 表紙（1ページ目）は単独、2ページ目以降見開き表示
+          <br />
           OFF: 1ページ目から見開き表示
         </p>
       </div>

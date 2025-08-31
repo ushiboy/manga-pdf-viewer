@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import React from 'react';
-import { AppProvider, useAppContext } from './AppContext';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import React from "react";
+import { AppProvider, useAppContext } from "./AppContext";
 
 // Mock the hooks that AppContext depends on
-vi.mock('../hooks/usePdfDocument', () => ({
+vi.mock("../hooks/usePdfDocument", () => ({
   usePdfDocument: vi.fn(() => ({
     pdfDocument: null,
     loadState: { isLoading: false, error: null, progress: 0, isLoaded: false },
@@ -13,11 +13,11 @@ vi.mock('../hooks/usePdfDocument', () => ({
   })),
 }));
 
-vi.mock('../hooks/useSettings', () => ({
+vi.mock("../hooks/useSettings", () => ({
   useSettings: vi.fn(() => ({
     settings: {
-      viewMode: 'single',
-      readingDirection: 'rtl',
+      viewMode: "single",
+      readingDirection: "rtl",
       treatFirstPageAsCover: true,
     },
     toggleViewMode: vi.fn(),
@@ -27,11 +27,11 @@ vi.mock('../hooks/useSettings', () => ({
   })),
 }));
 
-vi.mock('../hooks/useZoom', () => ({
+vi.mock("../hooks/useZoom", () => ({
   useZoom: vi.fn(() => ({
     zoomState: {
       scale: 1,
-      fitMode: 'width',
+      fitMode: "width",
       offsetX: 0,
       offsetY: 0,
       minScale: 0.1,
@@ -45,18 +45,18 @@ vi.mock('../hooks/useZoom', () => ({
   })),
 }));
 
-vi.mock('../hooks/useFullscreen', () => ({
+vi.mock("../hooks/useFullscreen", () => ({
   useFullscreen: vi.fn(() => ({
     isFullscreen: false,
     toggleFullscreen: vi.fn(),
   })),
 }));
 
-vi.mock('../hooks/useKeyboard', () => ({
+vi.mock("../hooks/useKeyboard", () => ({
   useKeyboard: vi.fn(),
 }));
 
-describe('AppContext', () => {
+describe("AppContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -65,20 +65,20 @@ describe('AppContext', () => {
     vi.restoreAllMocks();
   });
 
-  describe('useAppContext', () => {
-    it('should throw error when used outside of AppProvider', () => {
+  describe("useAppContext", () => {
+    it("should throw error when used outside of AppProvider", () => {
       // Suppress console.error for this test
       const originalError = console.error;
       console.error = vi.fn();
 
       expect(() => {
         renderHook(() => useAppContext());
-      }).toThrow('useAppContext must be used within an AppProvider');
+      }).toThrow("useAppContext must be used within an AppProvider");
 
       console.error = originalError;
     });
 
-    it('should return context value when used within AppProvider', () => {
+    it("should return context value when used within AppProvider", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -88,14 +88,14 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(1);
       expect(result.current.isUIVisible).toBe(true);
       expect(result.current.pdfDocument).toBeNull();
-      expect(result.current.viewMode).toBe('single');
-      expect(result.current.readingDirection).toBe('rtl');
+      expect(result.current.viewMode).toBe("single");
+      expect(result.current.readingDirection).toBe("rtl");
       expect(result.current.treatFirstPageAsCover).toBe(true);
     });
   });
 
-  describe('AppProvider', () => {
-    it('should provide initial state correctly', () => {
+  describe("AppProvider", () => {
+    it("should provide initial state correctly", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -112,16 +112,15 @@ describe('AppContext', () => {
         progress: 0,
         isLoaded: false,
       });
-      expect(result.current.viewMode).toBe('single');
-      expect(result.current.readingDirection).toBe('rtl');
+      expect(result.current.viewMode).toBe("single");
+      expect(result.current.readingDirection).toBe("rtl");
       expect(result.current.treatFirstPageAsCover).toBe(true);
       expect(result.current.isFullscreen).toBe(false);
     });
-
   });
 
-  describe('State Management', () => {
-    it('should handle UI visibility toggle', () => {
+  describe("State Management", () => {
+    it("should handle UI visibility toggle", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -143,16 +142,21 @@ describe('AppContext', () => {
       expect(result.current.isUIVisible).toBe(true);
     });
 
-    it('should handle page change with PDF document', async () => {
+    it("should handle page change with PDF document", async () => {
       const mockPdfDocument = {
         document: {} as any,
         numPages: 10,
       };
 
-      const { usePdfDocument } = await import('../hooks/usePdfDocument');
+      const { usePdfDocument } = await import("../hooks/usePdfDocument");
       vi.mocked(usePdfDocument).mockReturnValue({
         pdfDocument: mockPdfDocument,
-        loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
+        loadState: {
+          isLoading: false,
+          error: null,
+          progress: 0,
+          isLoaded: true,
+        },
         loadPdf: vi.fn(),
         clearPdf: vi.fn(),
       });
@@ -172,7 +176,7 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(5);
     });
 
-    it('should not change page without PDF document', () => {
+    it("should not change page without PDF document", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -189,12 +193,17 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(1);
     });
 
-    it('should handle file selection', async () => {
+    it("should handle file selection", async () => {
       const mockLoadPdf = vi.fn();
-      const { usePdfDocument } = await import('../hooks/usePdfDocument');
+      const { usePdfDocument } = await import("../hooks/usePdfDocument");
       vi.mocked(usePdfDocument).mockReturnValue({
         pdfDocument: null,
-        loadState: { isLoading: false, error: null, progress: 0, isLoaded: false },
+        loadState: {
+          isLoading: false,
+          error: null,
+          progress: 0,
+          isLoaded: false,
+        },
         loadPdf: mockLoadPdf,
         clearPdf: vi.fn(),
       });
@@ -205,7 +214,9 @@ describe('AppContext', () => {
 
       const { result } = renderHook(() => useAppContext(), { wrapper });
 
-      const mockFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+      const mockFile = new File(["test"], "test.pdf", {
+        type: "application/pdf",
+      });
 
       act(() => {
         result.current.handleFileSelect(mockFile);
@@ -215,7 +226,7 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(1); // Should reset to page 1
     });
 
-    it('should handle drag and drop events', () => {
+    it("should handle drag and drop events", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -226,7 +237,7 @@ describe('AppContext', () => {
         preventDefault: vi.fn(),
         stopPropagation: vi.fn(),
         dataTransfer: {
-          files: [new File(['test'], 'test.pdf', { type: 'application/pdf' })],
+          files: [new File(["test"], "test.pdf", { type: "application/pdf" })],
         },
       } as unknown as React.DragEvent;
 
@@ -247,8 +258,8 @@ describe('AppContext', () => {
     });
   });
 
-  describe('Page Navigation', () => {
-    it('should handle page navigation without PDF document', () => {
+  describe("Page Navigation", () => {
+    it("should handle page navigation without PDF document", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -275,16 +286,21 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(1); // Should remain at 1
     });
 
-    it('should handle page navigation with PDF document', async () => {
+    it("should handle page navigation with PDF document", async () => {
       const mockPdfDocument = {
         document: {} as any,
         numPages: 10,
       };
 
-      const { usePdfDocument } = await import('../hooks/usePdfDocument');
+      const { usePdfDocument } = await import("../hooks/usePdfDocument");
       vi.mocked(usePdfDocument).mockReturnValue({
         pdfDocument: mockPdfDocument,
-        loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
+        loadState: {
+          isLoading: false,
+          error: null,
+          progress: 0,
+          isLoaded: true,
+        },
         loadPdf: vi.fn(),
         clearPdf: vi.fn(),
       });
@@ -327,17 +343,22 @@ describe('AppContext', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle invalid page numbers', async () => {
+  describe("Error Handling", () => {
+    it("should handle invalid page numbers", async () => {
       const mockPdfDocument = {
         document: {} as any,
         numPages: 10,
       };
 
-      const { usePdfDocument } = await import('../hooks/usePdfDocument');
+      const { usePdfDocument } = await import("../hooks/usePdfDocument");
       vi.mocked(usePdfDocument).mockReturnValue({
         pdfDocument: mockPdfDocument,
-        loadState: { isLoading: false, error: null, progress: 0, isLoaded: true },
+        loadState: {
+          isLoading: false,
+          error: null,
+          progress: 0,
+          isLoaded: true,
+        },
         loadPdf: vi.fn(),
         clearPdf: vi.fn(),
       });
@@ -367,7 +388,7 @@ describe('AppContext', () => {
       expect(result.current.currentPage).toBe(5);
     });
 
-    it('should handle non-PDF files in drop', () => {
+    it("should handle non-PDF files in drop", () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AppProvider>{children}</AppProvider>
       );
@@ -378,7 +399,7 @@ describe('AppContext', () => {
         preventDefault: vi.fn(),
         stopPropagation: vi.fn(),
         dataTransfer: {
-          files: [new File(['test'], 'test.txt', { type: 'text/plain' })],
+          files: [new File(["test"], "test.txt", { type: "text/plain" })],
         },
       } as unknown as React.DragEvent;
 

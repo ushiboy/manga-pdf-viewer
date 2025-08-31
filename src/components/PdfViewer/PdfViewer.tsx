@@ -1,9 +1,9 @@
-import React from 'react';
-import { LoadingState } from './LoadingState';
-import { ErrorState } from './ErrorState';
-import { EmptyState } from './EmptyState';
-import { PdfCanvas } from './PdfCanvas';
-import { useAppContext } from '../../contexts';
+import React from "react";
+import { LoadingState } from "./LoadingState";
+import { ErrorState } from "./ErrorState";
+import { EmptyState } from "./EmptyState";
+import { PdfCanvas } from "./PdfCanvas";
+import { useAppContext } from "../../contexts";
 
 export const PdfViewer: React.FC = () => {
   const { pdfDocument, loadState } = useAppContext();

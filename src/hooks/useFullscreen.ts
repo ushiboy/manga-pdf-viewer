@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export const useFullscreen = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // フルスクリーン状態の更新
   const updateFullscreenState = useCallback(() => {
-    const fullscreenElement = document.fullscreenElement ||
+    const fullscreenElement =
+      document.fullscreenElement ||
       (document as any).webkitFullscreenElement ||
       (document as any).mozFullScreenElement ||
       (document as any).msFullscreenElement;
-    
+
     setIsFullscreen(!!fullscreenElement);
   }, []);
 
@@ -18,7 +19,7 @@ export const useFullscreen = () => {
     if (!document.fullscreenElement) {
       try {
         const element = document.documentElement;
-        
+
         if (element.requestFullscreen) {
           await element.requestFullscreen();
         } else if ((element as any).webkitRequestFullscreen) {
@@ -29,7 +30,7 @@ export const useFullscreen = () => {
           await (element as any).msRequestFullscreen();
         }
       } catch (error) {
-        console.error('フルスクリーンモードに入れませんでした:', error);
+        console.error("フルスクリーンモードに入れませんでした:", error);
       }
     }
   }, []);
@@ -48,7 +49,7 @@ export const useFullscreen = () => {
           await (document as any).msExitFullscreen();
         }
       } catch (error) {
-        console.error('フルスクリーンモードを終了できませんでした:', error);
+        console.error("フルスクリーンモードを終了できませんでした:", error);
       }
     }
   }, []);
@@ -65,13 +66,13 @@ export const useFullscreen = () => {
   // フルスクリーン状態の変化を監視
   useEffect(() => {
     const events = [
-      'fullscreenchange',
-      'webkitfullscreenchange',
-      'mozfullscreenchange',
-      'msfullscreenchange'
+      "fullscreenchange",
+      "webkitfullscreenchange",
+      "mozfullscreenchange",
+      "msfullscreenchange",
     ];
 
-    events.forEach(event => {
+    events.forEach((event) => {
       document.addEventListener(event, updateFullscreenState);
     });
 
@@ -79,7 +80,7 @@ export const useFullscreen = () => {
     updateFullscreenState();
 
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, updateFullscreenState);
       });
     };
