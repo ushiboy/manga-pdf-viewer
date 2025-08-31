@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { ZoomOutIcon, ZoomInIcon, FitIcon } from '../icons';
 
 interface ZoomControlsProps {
   onZoomOut?: () => void;
@@ -21,7 +22,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         onClick={onZoomOut}
         disabled={!onZoomOut}
       >
-        ➖
+        <ZoomOutIcon className="w-4 h-4" />
       </Button>
       <Button 
         variant="ghost" 
@@ -30,7 +31,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         onClick={onZoomIn}
         disabled={!onZoomIn}
       >
-        ➕
+        <ZoomInIcon className="w-4 h-4" />
       </Button>
       <Button 
         variant="ghost" 
@@ -39,7 +40,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         onClick={onToggleFitMode}
         disabled={!onToggleFitMode}
       >
-        🔍
+        <FitIcon className="w-4 h-4" />
       </Button>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ViewMode } from '../../types/settings';
+import { SpreadPageIcon } from '../icons';
 
 interface ViewModeSectionProps {
   viewMode: ViewMode;
@@ -13,7 +14,8 @@ export const ViewModeSection: React.FC<ViewModeSectionProps> = ({
   return (
     <fieldset>
       <legend className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-        📖 表示方式
+        <SpreadPageIcon className="w-4 h-4 mr-2" />
+        表示方式
       </legend>
       <div className="space-y-2" role="radiogroup">
         <label className="flex items-center space-x-3 cursor-pointer">

@@ -1,6 +1,12 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import type { ViewMode, ReadingDirection } from '../../types/settings';
+import {
+  FirstPageIcon,
+  PrevPageIcon,
+  NextPageIcon,
+  LastPageIcon,
+} from '../icons';
 
 interface NavigationControlsProps {
   currentPage: number;
@@ -74,7 +80,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             : (currentPage <= 1 || !nav.firstHandler)
         }
       >
-        ⏮️
+        <FirstPageIcon className="w-4 h-4" />
       </Button>
       <Button 
         variant="ghost" 
@@ -87,7 +93,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             : (currentPage <= 1 || !nav.prevHandler)
         }
       >
-        ⬅️
+        <PrevPageIcon className="w-4 h-4" />
       </Button>
       <Button 
         variant="ghost" 
@@ -100,7 +106,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             : (isAtLastPage || !nav.nextHandler)
         }
       >
-        ➡️
+        <NextPageIcon className="w-4 h-4" />
       </Button>
       <Button 
         variant="ghost" 
@@ -113,7 +119,7 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
             : (isAtLastSpread || !nav.lastHandler)
         }
       >
-        ⏭️
+        <LastPageIcon className="w-4 h-4" />
       </Button>
     </div>
   );

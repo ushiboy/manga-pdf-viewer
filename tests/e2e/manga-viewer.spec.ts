@@ -24,9 +24,9 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await expect(page.getByText('ドラッグ&ドロップまたはファイル選択ボタンから読み込み')).toBeVisible();
     
     // コントロールボタンが表示されている
-    await expect(page.getByRole('button', { name: '📁 ファイル選択' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '📄' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '⚙️' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'ファイル選択' })).toBeVisible();
+    await expect(page.getByTitle(/表示方式:/)).toBeVisible();
+    await expect(page.getByRole('button', { name: '設定' })).toBeVisible();
     
     // ナビゲーションボタンが無効化されている
     await expect(page.getByTitle('前のページ')).toBeDisabled();
@@ -42,7 +42,7 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     
     // ファイルチューザーイベントを先に設定してからクリック
     const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.getByRole('button', { name: '📁 ファイル選択' }).click();
+    await page.getByRole('button', { name: 'ファイル選択' }).click();
     
     // テスト用PDFファイルをアップロード
     const fileChooser = await fileChooserPromise;
@@ -96,7 +96,7 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await page.getByTitle('次のページ').click();
     
     // 見開き表示に切り替え
-    await page.getByRole('button', { name: '📄' }).click();
+    await page.getByTitle(/表示方式: 単一ページ/).click();
     await expect(page.getByRole('main')).toHaveAttribute('aria-label', /見開き表示/);
     
     // 見開きで2ページが表示される（右→左形式）
@@ -104,10 +104,10 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await expect(page.getByRole('img', { name: '左ページ 3' })).toBeVisible();
     
     // ボタンのアイコンが変更される
-    await expect(page.getByRole('button', { name: '📖' })).toBeVisible();
+    await expect(page.getByTitle(/表示方式: 見開きページ/)).toBeVisible();
     
     // 単ページ表示に戻す
-    await page.getByRole('button', { name: '📖' }).click();
+    await page.getByTitle(/表示方式: 見開きページ/).click();
     await expect(page.getByRole('main')).toHaveAttribute('aria-label', /単ページ表示/);
     await expect(page.getByRole('img', { name: 'ページ 2' })).toBeVisible();
   });
@@ -118,11 +118,11 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     
     // 2ページ目に移動して見開き表示
     await page.getByTitle('次のページ').click();
-    await page.getByRole('button', { name: '📄' }).click();
+    await page.getByTitle(/表示方式: 単一ページ/).click();
     
     // 設定パネルを開く
-    await page.getByRole('button', { name: '⚙️' }).click();
-    await expect(page.getByRole('dialog', { name: '⚙️ 設定' })).toBeVisible();
+    await page.getByRole('button', { name: '設定' }).click();
+    await expect(page.getByRole('dialog', { name: '設定' })).toBeVisible();
     
     // 読み方向を左→右に変更
     await page.getByRole('radio', { name: '左→右（英語）' }).click();
@@ -136,7 +136,7 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await expect(page.getByTitle('読み方向: 左→右（英語）')).toBeVisible();
     
     // 設定を日本語形式に戻す
-    await page.getByRole('button', { name: '⚙️' }).click();
+    await page.getByRole('button', { name: '設定' }).click();
     await page.getByRole('radio', { name: '右→左（日本語）' }).click();
     await page.getByRole('button', { name: '設定パネルを閉じる' }).click();
     await expect(page.getByTitle('読み方向: 右→左（日本語）')).toBeVisible();
@@ -150,16 +150,16 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await loadTestPDF(page);
     
     // ズームインボタンをクリック
-    await page.getByRole('button', { name: '➕' }).click();
+    await page.getByTitle('ズームイン').click();
     
     // ズームが実行されることを確認（ボタンの動作確認）
     await page.waitForTimeout(500); // ズーム処理完了を待機
     
     // ズームアウトボタンをクリック
-    await page.getByRole('button', { name: '➖' }).click();
+    await page.getByTitle('ズームアウト').click();
     
     // フィット表示ボタンをクリック
-    await page.getByRole('button', { name: '🔍' }).click();
+    await page.getByTitle('フィット表示').click();
   });
 
   test('フルスクリーンモード', async ({ page }) => {
@@ -170,14 +170,14 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await loadTestPDF(page);
     
     // フルスクリーンボタンをクリック
-    await page.getByRole('button', { name: '⛶' }).click();
+    await page.getByTitle(/フルスクリーン \(F11\)/).click();
     
     // フルスクリーンボタンのアイコンが変更される
-    await expect(page.getByRole('button', { name: '🗗' })).toBeVisible();
+    await expect(page.getByTitle(/フルスクリーン終了 \(F11\)/)).toBeVisible();
     
     // フルスクリーン終了
-    await page.getByRole('button', { name: '🗗' }).click();
-    await expect(page.getByRole('button', { name: '⛶' })).toBeVisible();
+    await page.getByTitle(/フルスクリーン終了 \(F11\)/).click();
+    await expect(page.getByTitle(/フルスクリーン \(F11\)/)).toBeVisible();
   });
 
   test('設定パネルの全機能確認', async ({ page }) => {
@@ -188,12 +188,12 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await loadTestPDF(page);
     
     // 設定パネルを開く
-    await page.getByRole('button', { name: '⚙️' }).click();
-    const settingsPanel = page.getByRole('dialog', { name: '⚙️ 設定' });
+    await page.getByRole('button', { name: '設定' }).click();
+    const settingsPanel = page.getByRole('dialog', { name: '設定' });
     await expect(settingsPanel).toBeVisible();
     
     // 表示方式設定の確認
-    await expect(page.getByText('📖 表示方式')).toBeVisible();
+    await expect(page.getByText('表示方式')).toBeVisible();
     await expect(page.getByRole('radio', { name: '単一ページ' })).toBeVisible();
     await expect(page.getByRole('radio', { name: '見開きページ' })).toBeVisible();
     
@@ -206,7 +206,7 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     await expect(page.getByText('🌙 テーマ')).toBeVisible();
     
     // 見開き設定の確認
-    await expect(page.getByText('🏷️ 見開き設定')).toBeVisible();
+    await expect(page.getByText('見開き設定')).toBeVisible();
     await expect(page.getByRole('checkbox', { name: '1ページ目を表紙として単独表示' })).toBeVisible();
     
     // 設定リセットボタンの確認
@@ -261,7 +261,7 @@ test.describe('漫画本PDFビューワー E2E テスト', () => {
     
     // ファイルチューザーイベントを先に設定してからクリック
     const fileChooserPromise = page.waitForEvent('filechooser');
-    await page.getByRole('button', { name: '📁 ファイル選択' }).click();
+    await page.getByRole('button', { name: 'ファイル選択' }).click();
     
     // PDFファイル読み込み
     const fileChooser = await fileChooserPromise;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { MenuIcon } from '../icons';
 
 interface FloatingShowButtonProps {
   isVisible: boolean;
@@ -26,7 +27,7 @@ export const FloatingShowButton: React.FC<FloatingShowButtonProps> = ({
         aria-label="Show UI controls"
         className="shadow-lg backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-700 !text-blue-600 dark:!text-blue-400 border border-blue-200 dark:border-blue-600 font-semibold text-lg"
       >
-        ☰
+        <MenuIcon className="w-5 h-5" />
       </Button>
     </div>
   );

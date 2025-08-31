@@ -53,7 +53,7 @@ describe('HeaderBar', () => {
       const user = userEvent.setup();
       const { getByText, getByLabelText } = render(<HeaderBar {...defaultProps} />);
       
-      const fileButton = getByText('📁 ファイル選択');
+      const fileButton = getByText('ファイル選択');
       const fileInput = getByLabelText('PDF file selection') as HTMLInputElement;
       
       // Mock the click method since it's called programmatically
@@ -140,50 +140,50 @@ describe('HeaderBar', () => {
   });
 
   describe('View Mode Display', () => {
-    it('should display single page icon when viewMode is single', () => {
+    it('should display view mode button with correct title when viewMode is single', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} viewMode="single" />);
       
       const viewModeButton = getByTitle(/表示方式: 単一ページ/);
-      expect(viewModeButton).toHaveTextContent('📄');
+      expect(viewModeButton).toBeInTheDocument();
     });
 
-    it('should display spread page icon when viewMode is spread', () => {
+    it('should display view mode button with correct title when viewMode is spread', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} viewMode="spread" />);
       
       const viewModeButton = getByTitle(/表示方式: 見開きページ/);
-      expect(viewModeButton).toHaveTextContent('📖');
+      expect(viewModeButton).toBeInTheDocument();
     });
   });
 
   describe('Reading Direction Display', () => {
-    it('should display right-to-left arrow when readingDirection is rtl', () => {
+    it('should display reading direction button with correct title when readingDirection is rtl', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} readingDirection="rtl" />);
       
       const readingDirectionButton = getByTitle(/読み方向: 右→左（日本語）/);
-      expect(readingDirectionButton).toHaveTextContent('⬅️');
+      expect(readingDirectionButton).toBeInTheDocument();
     });
 
-    it('should display left-to-right arrow when readingDirection is ltr', () => {
+    it('should display reading direction button with correct title when readingDirection is ltr', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} readingDirection="ltr" />);
       
       const readingDirectionButton = getByTitle(/読み方向: 左→右（英語）/);
-      expect(readingDirectionButton).toHaveTextContent('➡️');
+      expect(readingDirectionButton).toBeInTheDocument();
     });
   });
 
   describe('Fullscreen Display', () => {
-    it('should display fullscreen icon when not in fullscreen', () => {
+    it('should display fullscreen button with correct title when not in fullscreen', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} isFullscreen={false} />);
       
       const fullscreenButton = getByTitle(/フルスクリーン \(F11\)/);
-      expect(fullscreenButton).toHaveTextContent('⛶');
+      expect(fullscreenButton).toBeInTheDocument();
     });
 
-    it('should display exit fullscreen icon when in fullscreen', () => {
+    it('should display fullscreen button with correct title when in fullscreen', () => {
       const { getByTitle } = render(<HeaderBar {...defaultProps} isFullscreen={true} />);
       
       const fullscreenButton = getByTitle(/フルスクリーン終了 \(F11\)/);
-      expect(fullscreenButton).toHaveTextContent('🗗');
+      expect(fullscreenButton).toBeInTheDocument();
     });
   });
 
@@ -220,7 +220,7 @@ describe('HeaderBar', () => {
       const { getByTitle } = render(<HeaderBar {...propsWithoutFullscreen} />);
       
       const fullscreenButton = getByTitle(/フルスクリーン \(F11\)/);
-      expect(fullscreenButton).toHaveTextContent('⛶');
+      expect(fullscreenButton).toBeInTheDocument();
     });
   });
 
