@@ -10,6 +10,7 @@ A manga-specialized PDF viewer that runs in browsers. Supports reading direction
 - **Spread View** - Display two pages simultaneously (magazine style)
 - **Cover Mode** - Configurable handling of the first page in spread view
 - **Reading Direction Support** - Japanese manga (right → left) and Western comics (left → right)
+- **Performance Optimized** - Smooth page navigation with debounced PDF rendering (250ms buffering)
 
 ### 🎮 Controls
 
@@ -22,6 +23,8 @@ A manga-specialized PDF viewer that runs in browsers. Supports reading direction
 - **Manual Toggle UI** - Hidden mode for focused reading
 - **Responsive Design** - Desktop, tablet, and smartphone support
 - **Dark Mode Support** - Eye-friendly display settings
+- **React Icons Integration** - Consistent and scalable icon system
+- **Code Quality** - Prettier formatting and comprehensive testing
 
 ### 📱 PWA Features
 
@@ -67,6 +70,17 @@ https://ushiboy.github.io/manga-pdf-viewer/
 - Node.js 22.x or higher
 - pnpm (recommended)
 
+### Tech Stack
+
+- **Frontend**: React 19 + TypeScript + Vite
+- **Styling**: Tailwind CSS v4
+- **PDF Processing**: PDF.js v5.4.54
+- **Performance**: Lodash debounce optimization
+- **Icons**: React Icons v5.5.0
+- **PWA**: Service Worker + Web App Manifest
+- **Code Quality**: Prettier v3.6.2
+- **Testing**: Vitest (unit) + Playwright (E2E)
+
 ### Setup
 
 ```bash
@@ -89,6 +103,18 @@ pnpm dev
 
 # Type check
 pnpm type-check
+
+# Code formatting
+pnpm format
+pnpm format:check
+
+# Testing
+pnpm test              # Unit tests (watch mode)
+pnpm test:run          # Unit tests (single run)
+pnpm test:coverage     # Coverage report
+pnpm test:e2e          # E2E tests
+pnpm test:e2e:ui       # E2E tests with UI
+pnpm test:e2e:report   # E2E test report
 
 # Build
 pnpm build
