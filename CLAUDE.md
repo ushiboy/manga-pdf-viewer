@@ -11,9 +11,11 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 - React 19+ with TypeScript
 - Vite（開発環境・ビルドツール）
 - pnpm（パッケージ管理）
-- PDF.js ライブラリ（npm経由：pdfjs-dist v4.8.69）
+- PDF.js ライブラリ（npm経由：pdfjs-dist v5.4.54）
 - Tailwind CSS v4（スタイリング）
-- PWA対応（vite-plugin-pwa v1.0.2）
+- React Icons（アイコンライブラリ）
+- Lodash（ユーティリティライブラリ）
+- PWA対応（vite-plugin-pwa v1.0.3）
 - Service Worker & Web App Manifest
 - レスポンシブデザイン（デスクトップ・タブレット・スマートフォン対応）
 - ローカルストレージを使用した設定保存
@@ -50,6 +52,7 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 - 前ページ・次ページ移動
 - 特定ページへの直接ジャンプ
 - ページ情報表示（現在ページ/総ページ数）
+- **パフォーマンス最適化**: lodash debounceを活用した連続ページ移動時のPDF描画コスト削減（250ms遅延バッファリング）
 
 ### 4. ズーム機能
 
@@ -144,20 +147,30 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 ```json
 {
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "pdfjs-dist": "^4.8.69",
+    "lodash": "^4.17.21",
+    "pdfjs-dist": "^5.4.54",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "typescript": "^5.6.2",
-    "vite": "^6.0.1",
-    "@tailwindcss/vite": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "vite-plugin-pwa": "^1.0.2"
+    "@playwright/test": "^1.55.0",
+    "@tailwindcss/vite": "^4.1.12",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/lodash": "^4.17.20",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "happy-dom": "^18.0.1",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^3.2.4"
   }
 }
 ```
@@ -177,7 +190,8 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 - React Hooks（useState, useEffect, useCallback）を活用
 - カスタムHooksによる状態管理の抽象化
 - 以下の状態をグローバルで管理:
-  - 現在ページ
+  - 現在ページ（UI表示用）
+  - レンダーページ（PDF描画用）- debounce最適化
   - ズーム倍率
   - 表示方式（単ページ・見開き）
   - 読み方向（RTL・LTR）
@@ -185,6 +199,7 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
   - UIの表示/非表示状態
 - ユーザー設定をlocalStorageで永続化
 - 設定変更の即座反映
+- **パフォーマンス最適化**: UI状態とPDF描画状態の分離による高速レスポンス
 
 ### 3. コンポーネント設計
 
@@ -200,6 +215,9 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 - 必要なページのみをレンダリング
 - 画像キャッシュ機能
 - スムーズなページ切り替えアニメーション（Tailwind CSS）
+- **連続ページ移動最適化**: lodash debounceによるPDF描画の遅延実行（250ms）
+- UI状態とレンダリング状態の分離による即座のユーザーフィードバック
+- 適切なクリーンアップ処理によるメモリリーク防止
 
 ### 5. エラーハンドリング
 
@@ -222,9 +240,12 @@ PWA（Progressive Web App）として動作し、オフライン環境でも利�
 comic-viewer/
 ├── package.json              # 依存関係定義
 ├── pnpm-lock.yaml           # パッケージロックファイル
+├── .prettierrc              # Prettier設定（デフォルト設定）
 ├── tsconfig.json            # TypeScript設定（PWA型定義含む）
 ├── vite.config.ts           # Vite & PWA設定
 ├── index.html               # エントリーポイント
+├── playwright.config.ts     # Playwright E2Eテスト設定
+├── vitest.config.ts         # Vitest単体テスト設定
 ├── public/
 │   ├── favicon-192x192.png  # PWAアイコン（192x192）
 │   ├── favicon-512x512.png  # PWAアイコン（512x512）
@@ -233,26 +254,39 @@ comic-viewer/
 │   ├── manifest.webmanifest # PWAマニフェスト
 │   ├── sw.js               # Service Worker
 │   └── workbox-*.js        # Workboxライブラリ
+├── tests/                   # E2Eテスト
+│   └── e2e/                # Playwright E2Eテスト
 └── src/
     ├── main.tsx             # アプリケーションエントリーポイント
     ├── App.tsx              # メインアプリケーションコンポーネント
     ├── components/
-    │   ├── PdfViewer.tsx    # PDFビューワーメインコンポーネント
-    │   ├── OverlayUI.tsx    # オーバーレイUI管理
-    │   ├── HeaderBar.tsx    # ヘッダーバー
-    │   ├── FooterBar.tsx    # フッターバー（RTL対応）
-    │   ├── SettingsPanel.tsx # 設定モーダルパネル
-    │   ├── FloatingShowButton.tsx # UI表示ボタン
-    │   └── PWAUpdateNotification.tsx # PWA更新通知
+    │   ├── PdfViewer/       # PDFビューワーコンポーネント群
+    │   ├── OverlayUI/       # オーバーレイUI管理
+    │   ├── HeaderBar/       # ヘッダーバー
+    │   ├── FooterBar/       # フッターバー（RTL対応）
+    │   ├── SettingsPanel/   # 設定モーダルパネル
+    │   ├── FloatingShowButton/ # UI表示ボタン
+    │   ├── PWAUpdateNotification/ # PWA更新通知
+    │   ├── ui/              # 共通UIコンポーネント
+    │   └── icons/           # アイコン定義（React Icons活用）
+    ├── contexts/
+    │   └── AppContext.tsx   # アプリケーション状態管理（debounce最適化含む）
     ├── hooks/
     │   ├── usePdfDocument.ts # PDF処理カスタムHook
+    │   ├── usePdfRenderer.ts # PDF描画カスタムHook（最適化済み）
     │   ├── useSettings.ts   # 設定管理カスタムHook
     │   ├── useKeyboard.ts   # キーボード操作カスタムHook
     │   ├── useTouch.ts      # タッチ操作カスタムHook（RTL対応）
     │   ├── useZoom.ts       # ズーム機能カスタムHook
+    │   ├── useCanvasInteraction.ts # Canvas操作カスタムHook
     │   └── useFullscreen.ts # フルスクリーン機能カスタムHook
     ├── types/
-    │   └── settings.ts      # 設定関連型定義
+    │   ├── settings.ts      # 設定関連型定義
+    │   └── pdf.ts           # PDF関連型定義
+    ├── utils/
+    │   └── pdfWorker.ts     # PDF.js Worker設定
+    ├── test/
+    │   └── setup.ts         # テストセットアップ
     └── styles/
         └── globals.css      # グローバルスタイル（Tailwind CSS）
 ```
@@ -265,6 +299,9 @@ comic-viewer/
 - ✅ **表示機能**: 単ページ・見開き表示・表紙モード・読み方向対応
 - ✅ **設定管理**: localStorage永続化・設定リセット機能
 - ✅ **PWA機能**: Service Worker・オフライン対応・インストール可能・自動更新
+- ✅ **パフォーマンス最適化**: lodash debounceによる連続ページ移動の描画コスト削減
+- ✅ **開発品質**: Prettier統合・包括的テストスイート（Vitest + Playwright）
+- ✅ **アイコンシステム**: React Iconsによる一貫性のあるアイコン表示
 
 ## 技術的特徴
 
@@ -272,7 +309,8 @@ comic-viewer/
 - **RTL/LTR対応**: 日本漫画（右→左）・海外漫画（左→右）の読み方向切り替え
 - **レスポンシブ**: デスクトップ・タブレット・スマートフォン完全対応
 - **型安全**: TypeScript完全活用・カスタムHooks・コンポーネント設計
-- **パフォーマンス**: React 19・Vite・最適化されたキャッシュ戦略
+- **パフォーマンス**: React 19・Vite・最適化されたキャッシュ戦略・debounce最適化
+- **開発体験**: Prettier自動フォーマット・包括的テストカバレッジ・E2E自動テスト
 
 ## 成果物
 
@@ -294,6 +332,18 @@ pnpm dev
 
 # 型チェック
 pnpm type-check
+
+# コードフォーマット
+pnpm format
+pnpm format:check
+
+# テスト実行
+pnpm test              # 単体テスト（watch mode）
+pnpm test:run          # 単体テスト（1回実行）
+pnpm test:coverage     # カバレッジレポート付き
+pnpm test:e2e          # E2Eテスト
+pnpm test:e2e:ui       # E2EテストUI
+pnpm test:e2e:report   # E2Eテストレポート表示
 
 # ビルド
 pnpm build
@@ -345,6 +395,14 @@ pnpm preview
 - 従来の自動表示/非表示から手動トグルに変更
 - フローティング表示ボタンによる直感的操作
 - 読書に集中できるUI設計
+
+### パフォーマンス最適化
+
+- **デバウンス実装**: lodashのdebounce APIを活用
+- **状態分離**: UI表示用ページとPDF描画用ページの独立管理
+- **遅延描画**: 250ms遅延によるバッファリング効果
+- **メモリ管理**: 適切なクリーンアップ処理によるメモリリーク防止
+- **ユーザー体験**: 即座のUI反応と最適化された描画処理の両立
 
 ## 補足事項
 

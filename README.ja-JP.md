@@ -10,6 +10,7 @@
 - **見開き表示** - 2 ページ同時表示（雑誌スタイル）
 - **表紙モード** - 見開き時の 1 ページ目の扱いを設定可能
 - **読み方向対応** - 日本漫画（右 → 左）と海外漫画（左 → 右）
+- **パフォーマンス最適化** - debounce処理によるスムーズなページナビゲーション（250msバッファリング）
 
 ### 🎮 操作方法
 
@@ -22,6 +23,8 @@
 - **手動トグル UI** - 読書に集中できる非表示モード
 - **レスポンシブデザイン** - デスクトップ・タブレット・スマートフォン対応
 - **ダークモード対応** - 目に優しい表示設定
+- **React Icons 統合** - 一貫性のあるスケーラブルアイコンシステム
+- **コード品質** - Prettier フォーマットと包括的テスト
 
 ### 📱 PWA 機能
 
@@ -67,6 +70,17 @@ https://ushiboy.github.io/manga-pdf-viewer/
 - Node.js 22.x 以上
 - pnpm（推奨）
 
+### 技術スタック
+
+- **フロントエンド**: React 19 + TypeScript + Vite
+- **スタイリング**: Tailwind CSS v4
+- **PDF 処理**: PDF.js v5.4.54
+- **パフォーマンス**: Lodash debounce 最適化
+- **アイコン**: React Icons v5.5.0
+- **PWA**: Service Worker + Web App Manifest
+- **コード品質**: Prettier v3.6.2
+- **テスト**: Vitest（単体） + Playwright（E2E）
+
 ### セットアップ
 
 ```bash
@@ -89,6 +103,18 @@ pnpm dev
 
 # 型チェック
 pnpm type-check
+
+# コードフォーマット
+pnpm format
+pnpm format:check
+
+# テスト
+pnpm test              # 単体テスト（watch mode）
+pnpm test:run          # 単体テスト（1回実行）
+pnpm test:coverage     # カバレッジレポート
+pnpm test:e2e          # E2Eテスト
+pnpm test:e2e:ui       # E2Eテスト UIモード
+pnpm test:e2e:report   # E2Eテストレポート表示
 
 # ビルド
 pnpm build
