@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
-import pdfjsLib from '../utils/pdfWorker';
-import type { PdfDocument, PdfLoadState } from '../types/pdf';
+import { useState, useCallback, useRef } from "react";
+import pdfjsLib from "../utils/pdfWorker";
+import type { PdfDocument, PdfLoadState } from "../types/pdf";
 
 export const usePdfDocument = () => {
   const [pdfDocument, setPdfDocument] = useState<PdfDocument | null>(null);
@@ -21,7 +21,7 @@ export const usePdfDocument = () => {
 
     // 新しいAbortControllerを作成
     abortControllerRef.current = new AbortController();
-    
+
     // 初期状態にリセット
     setPdfDocument(null);
     setLoadState({
@@ -33,31 +33,34 @@ export const usePdfDocument = () => {
 
     try {
       // ファイル検証
-      if (file.type !== 'application/pdf') {
-        throw new Error('PDFファイルを選択してください');
+      if (file.type !== "application/pdf") {
+        throw new Error("PDFファイルを選択してください");
       }
 
       // ファイルをArrayBufferに変換
       const arrayBuffer = await file.arrayBuffer();
-      
+
       if (abortControllerRef.current.signal.aborted) {
         return;
       }
 
-      setLoadState(prev => ({ ...prev, progress: 50 }));
+      setLoadState((prev) => ({ ...prev, progress: 50 }));
 
       // PDF文書を読み込み
       const loadingTask = pdfjsLib.getDocument({
         data: arrayBuffer,
-        cMapUrl: '/node_modules/pdfjs-dist/cmaps/',
+        cMapUrl: "/node_modules/pdfjs-dist/cmaps/",
         cMapPacked: true,
       });
 
       // 進行状況を監視
       loadingTask.onProgress = (progressData: any) => {
         if (progressData.total > 0) {
-          const progress = Math.min(90, (progressData.loaded / progressData.total) * 90);
-          setLoadState(prev => ({ ...prev, progress }));
+          const progress = Math.min(
+            90,
+            (progressData.loaded / progressData.total) * 90,
+          );
+          setLoadState((prev) => ({ ...prev, progress }));
         }
       };
 
@@ -84,23 +87,22 @@ export const usePdfDocument = () => {
         error: null,
         progress: 100,
       });
-
     } catch (error) {
       if (abortControllerRef.current?.signal.aborted) {
         return;
       }
 
-      console.error('PDF読み込みエラー:', error);
-      
-      let errorMessage = 'PDFファイルの読み込みに失敗しました';
-      
+      console.error("PDF読み込みエラー:", error);
+
+      let errorMessage = "PDFファイルの読み込みに失敗しました";
+
       if (error instanceof Error) {
-        if (error.message.includes('Invalid PDF')) {
-          errorMessage = '無効なPDFファイルです';
-        } else if (error.message.includes('Encrypted')) {
-          errorMessage = '暗号化されたPDFはサポートされていません';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'ネットワークエラーが発生しました';
+        if (error.message.includes("Invalid PDF")) {
+          errorMessage = "無効なPDFファイルです";
+        } else if (error.message.includes("Encrypted")) {
+          errorMessage = "暗号化されたPDFはサポートされていません";
+        } else if (error.message.includes("network")) {
+          errorMessage = "ネットワークエラーが発生しました";
         } else {
           errorMessage = error.message;
         }
@@ -119,7 +121,7 @@ export const usePdfDocument = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
+
     setPdfDocument(null);
     setLoadState({
       isLoading: false,

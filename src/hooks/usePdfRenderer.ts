@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import type { PdfDocument } from '../types/pdf';
-import type { ViewMode, ReadingDirection, ZoomState } from '../types/settings';
+import { useEffect, useRef, useState } from "react";
+import type { PdfDocument } from "../types/pdf";
+import type { ViewMode, ReadingDirection, ZoomState } from "../types/settings";
 
 interface UsePdfRendererProps {
   pdfDocument: PdfDocument | null;
@@ -14,7 +14,7 @@ interface UsePdfRendererProps {
     pageHeight: number,
     containerWidth: number,
     containerHeight: number,
-    fitMode: any
+    fitMode: any,
   ) => number;
   isUIVisible: boolean;
 }
@@ -50,26 +50,26 @@ export const usePdfRenderer = ({
   const setupCanvas = (
     canvas: HTMLCanvasElement,
     scaledViewport: any,
-    devicePixelRatio: number
+    devicePixelRatio: number,
   ) => {
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     if (!context) return null;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     canvas.width = scaledViewport.width * devicePixelRatio;
     canvas.height = scaledViewport.height * devicePixelRatio;
-    canvas.style.width = scaledViewport.width + 'px';
-    canvas.style.height = scaledViewport.height + 'px';
+    canvas.style.width = scaledViewport.width + "px";
+    canvas.style.height = scaledViewport.height + "px";
 
     context.scale(devicePixelRatio, devicePixelRatio);
 
-    if (zoomState?.fitMode === 'custom') {
+    if (zoomState?.fitMode === "custom") {
       const offsetX = zoomState.offsetX || 0;
       const offsetY = zoomState.offsetY || 0;
       canvas.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
     } else {
-      canvas.style.transform = '';
+      canvas.style.transform = "";
     }
 
     return context;
@@ -79,11 +79,11 @@ export const usePdfRenderer = ({
   const calculateScale = (
     viewport: any,
     containerWidth: number,
-    containerHeight: number
+    containerHeight: number,
   ): number => {
     if (!zoomState) return 1;
 
-    if (zoomState.fitMode === 'custom') {
+    if (zoomState.fitMode === "custom") {
       return zoomState.scale;
     }
 
@@ -93,7 +93,7 @@ export const usePdfRenderer = ({
         viewport.height,
         containerWidth,
         containerHeight,
-        zoomState.fitMode
+        zoomState.fitMode,
       );
     }
 
@@ -115,12 +115,12 @@ export const usePdfRenderer = ({
     const canvas = leftCanvasRef.current;
     const page = await pdfDocument.document.getPage(currentPage);
     const viewport = page.getViewport({ scale: 1 });
-    
+
     const { containerWidth, containerHeight } = getContainerSize();
     const scale = calculateScale(viewport, containerWidth, containerHeight);
     const scaledViewport = page.getViewport({ scale });
     const devicePixelRatio = window.devicePixelRatio || 1;
-    
+
     const context = setupCanvas(canvas, scaledViewport, devicePixelRatio);
     if (!context) return;
 
@@ -135,7 +135,10 @@ export const usePdfRenderer = ({
   };
 
   // 見開きページ番号計算
-  const calculateSpreadPages = (): { leftPageNum: number; rightPageNum: number } => {
+  const calculateSpreadPages = (): {
+    leftPageNum: number;
+    rightPageNum: number;
+  } => {
     let leftPageNum: number;
     let rightPageNum: number;
 
@@ -144,7 +147,7 @@ export const usePdfRenderer = ({
         leftPageNum = 1;
         rightPageNum = 0;
       } else {
-        if (readingDirection === 'rtl') {
+        if (readingDirection === "rtl") {
           leftPageNum = currentPage + 1;
           rightPageNum = currentPage;
         } else {
@@ -153,7 +156,7 @@ export const usePdfRenderer = ({
         }
       }
     } else {
-      if (readingDirection === 'rtl') {
+      if (readingDirection === "rtl") {
         leftPageNum = currentPage + 1;
         rightPageNum = currentPage;
       } else {
@@ -169,27 +172,27 @@ export const usePdfRenderer = ({
   const renderCanvas = async (
     canvas: HTMLCanvasElement,
     pageNum: number,
-    taskKey: 'left' | 'right'
+    taskKey: "left" | "right",
   ): Promise<void> => {
     if (!pdfDocument?.document) return;
 
     if (pageNum <= 0 || pageNum > pdfDocument.numPages) {
-      canvas.style.display = 'none';
+      canvas.style.display = "none";
       return;
     }
 
-    canvas.style.display = 'block';
+    canvas.style.display = "block";
 
     const page = await pdfDocument.document.getPage(pageNum);
     const viewport = page.getViewport({ scale: 1 });
-    
+
     const { containerWidth, containerHeight } = getContainerSize();
     // 見開き用のサイズ計算（コンテナ幅を2分割）
     const pageContainerWidth = containerWidth / 2;
     const scale = calculateScale(viewport, pageContainerWidth, containerHeight);
     const scaledViewport = page.getViewport({ scale });
     const devicePixelRatio = window.devicePixelRatio || 1;
-    
+
     const context = setupCanvas(canvas, scaledViewport, devicePixelRatio);
     if (!context) return;
 
@@ -210,8 +213,8 @@ export const usePdfRenderer = ({
     const { leftPageNum, rightPageNum } = calculateSpreadPages();
 
     await Promise.all([
-      renderCanvas(leftCanvasRef.current, leftPageNum, 'left'),
-      renderCanvas(rightCanvasRef.current, rightPageNum, 'right'),
+      renderCanvas(leftCanvasRef.current, leftPageNum, "left"),
+      renderCanvas(rightCanvasRef.current, rightPageNum, "right"),
     ]);
   };
 
@@ -238,7 +241,7 @@ export const usePdfRenderer = ({
 
     if (cancelPromises.length > 0) {
       await Promise.all(cancelPromises);
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
   };
 
@@ -253,14 +256,14 @@ export const usePdfRenderer = ({
 
       await cancelRenderTasks();
 
-      if (viewMode === 'single') {
+      if (viewMode === "single") {
         await renderSinglePage();
       } else {
         await renderSpreadPages();
       }
     } catch (error) {
-      console.error('PDF rendering error:', error);
-      setRenderError('PDFの描画に失敗しました');
+      console.error("PDF rendering error:", error);
+      setRenderError("PDFの描画に失敗しました");
     } finally {
       isRenderingRef.current = false;
       setIsRendering(false);
@@ -286,7 +289,15 @@ export const usePdfRenderer = ({
         tasks.right = undefined;
       }
     };
-  }, [pdfDocument, currentPage, viewMode, zoomState, treatFirstPageAsCover, readingDirection, isUIVisible]);
+  }, [
+    pdfDocument,
+    currentPage,
+    viewMode,
+    zoomState,
+    treatFirstPageAsCover,
+    readingDirection,
+    isUIVisible,
+  ]);
 
   return {
     leftCanvasRef,

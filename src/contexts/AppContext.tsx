@@ -1,18 +1,24 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { usePdfDocument } from '../hooks/usePdfDocument';
-import { useSettings } from '../hooks/useSettings';
-import { useZoom } from '../hooks/useZoom';
-import { useFullscreen } from '../hooks/useFullscreen';
-import { useKeyboard } from '../hooks/useKeyboard';
-import type { PdfDocument, PdfLoadState } from '../types/pdf';
-import type { ViewMode, ReadingDirection, ZoomState } from '../types/settings';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+import { usePdfDocument } from "../hooks/usePdfDocument";
+import { useSettings } from "../hooks/useSettings";
+import { useZoom } from "../hooks/useZoom";
+import { useFullscreen } from "../hooks/useFullscreen";
+import { useKeyboard } from "../hooks/useKeyboard";
+import type { PdfDocument, PdfLoadState } from "../types/pdf";
+import type { ViewMode, ReadingDirection, ZoomState } from "../types/settings";
 
 interface AppContextType {
   // PDF関連
   pdfDocument: PdfDocument | null;
   loadState: PdfLoadState;
   loadPdf: (file: File) => Promise<void>;
-  
+
   // ページ関連
   currentPage: number;
   handlePageChange: (page: number) => void;
@@ -20,12 +26,12 @@ interface AppContextType {
   goToNextPage: () => void;
   goToFirstPage: () => void;
   goToLastPage: () => void;
-  
+
   // UI状態
   isUIVisible: boolean;
   showUI: () => void;
   hideUI: () => void;
-  
+
   // 設定関連
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
@@ -34,7 +40,7 @@ interface AppContextType {
   toggleReadingDirection: () => void;
   toggleTreatFirstPageAsCover: () => void;
   resetToDefaults: () => void;
-  
+
   // ズーム関連
   zoomState: ZoomState;
   calculateFitScale: (
@@ -42,7 +48,7 @@ interface AppContextType {
     pageHeight: number,
     containerWidth: number,
     containerHeight: number,
-    fitMode: any
+    fitMode: any,
   ) => number;
   handleZoomIn: () => void;
   handleZoomOut: () => void;
@@ -53,13 +59,13 @@ interface AppContextType {
     containerWidth?: number,
     containerHeight?: number,
     pageWidth?: number,
-    pageHeight?: number
+    pageHeight?: number,
   ) => void;
-  
+
   // フルスクリーン関連
   isFullscreen: boolean;
   toggleFullscreen: () => void;
-  
+
   // ファイル操作関連
   handleFileSelect: (file: File) => void;
   handleDragOver: (e: React.DragEvent) => void;
@@ -75,48 +81,70 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isUIVisible, setIsUIVisible] = useState(true);
-  
+
   // 既存のhooksを使用
   const { pdfDocument, loadState, loadPdf } = usePdfDocument();
-  const { settings, toggleViewMode, toggleReadingDirection, toggleTreatFirstPageAsCover, resetToDefaults } = useSettings();
-  const { zoomState, zoomIn, zoomOut, cycleFitMode, calculateFitScale, setOffset } = useZoom();
+  const {
+    settings,
+    toggleViewMode,
+    toggleReadingDirection,
+    toggleTreatFirstPageAsCover,
+    resetToDefaults,
+  } = useSettings();
+  const {
+    zoomState,
+    zoomIn,
+    zoomOut,
+    cycleFitMode,
+    calculateFitScale,
+    setOffset,
+  } = useZoom();
   const { isFullscreen, toggleFullscreen } = useFullscreen();
 
   // ズーム関数をラップ
   const handleZoomIn = useCallback(() => zoomIn(), [zoomIn]);
   const handleZoomOut = useCallback(() => zoomOut(), [zoomOut]);
 
-  const handleFileSelect = useCallback((file: File) => {
-    loadPdf(file);
-    setCurrentPage(1);
-  }, [loadPdf]);
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      loadPdf(file);
+      setCurrentPage(1);
+    },
+    [loadPdf],
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const files = e.dataTransfer.files;
-    const file = files[0];
-    
-    if (file && file.type === 'application/pdf') {
-      handleFileSelect(file);
-    }
-  }, [handleFileSelect]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const handlePageChange = useCallback((page: number) => {
-    if (!pdfDocument) return;
-    
-    const clampedPage = Math.max(1, Math.min(page, pdfDocument.numPages));
-    setCurrentPage(clampedPage);
-  }, [pdfDocument]);
+      const files = e.dataTransfer.files;
+      const file = files[0];
+
+      if (file && file.type === "application/pdf") {
+        handleFileSelect(file);
+      }
+    },
+    [handleFileSelect],
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (!pdfDocument) return;
+
+      const clampedPage = Math.max(1, Math.min(page, pdfDocument.numPages));
+      setCurrentPage(clampedPage);
+    },
+    [pdfDocument],
+  );
 
   const goToPreviousPage = useCallback(() => {
-    if (settings.viewMode === 'single') {
+    if (settings.viewMode === "single") {
       handlePageChange(currentPage - 1);
     } else {
       // 見開き表示時の前ページ処理
@@ -139,12 +167,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       handlePageChange(prevPage);
     }
-  }, [handlePageChange, currentPage, settings.viewMode, settings.treatFirstPageAsCover]);
+  }, [
+    handlePageChange,
+    currentPage,
+    settings.viewMode,
+    settings.treatFirstPageAsCover,
+  ]);
 
   const goToNextPage = useCallback(() => {
     if (!pdfDocument) return;
-    
-    if (settings.viewMode === 'single') {
+
+    if (settings.viewMode === "single") {
       handlePageChange(currentPage + 1);
     } else {
       // 見開き表示時の次ページ処理
@@ -177,7 +210,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       handlePageChange(nextPage);
     }
-  }, [handlePageChange, currentPage, settings.viewMode, settings.treatFirstPageAsCover, pdfDocument]);
+  }, [
+    handlePageChange,
+    currentPage,
+    settings.viewMode,
+    settings.treatFirstPageAsCover,
+    pdfDocument,
+  ]);
 
   const goToFirstPage = useCallback(() => {
     handlePageChange(1);
@@ -185,14 +224,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const goToLastPage = useCallback(() => {
     if (!pdfDocument) return;
-    
-    if (settings.viewMode === 'single') {
+
+    if (settings.viewMode === "single") {
       handlePageChange(pdfDocument.numPages);
     } else {
       // 見開き表示時の最終ページ処理
       const totalPages = pdfDocument.numPages;
       let lastSpreadPage;
-      
+
       if (settings.treatFirstPageAsCover) {
         // 表紙モードON：1ページ目は単独、2ページ目以降見開き
         if (totalPages <= 2) {
@@ -211,14 +250,36 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           lastSpreadPage = totalPages % 2 === 1 ? totalPages : totalPages - 1;
         }
       }
-      
+
       handlePageChange(lastSpreadPage);
     }
-  }, [handlePageChange, pdfDocument, settings.viewMode, settings.treatFirstPageAsCover]);
+  }, [
+    handlePageChange,
+    pdfDocument,
+    settings.viewMode,
+    settings.treatFirstPageAsCover,
+  ]);
 
-  const handlePan = useCallback((offsetX: number, offsetY: number, containerWidth?: number, containerHeight?: number, pageWidth?: number, pageHeight?: number) => {
-    setOffset(offsetX, offsetY, containerWidth, containerHeight, pageWidth, pageHeight);
-  }, [setOffset]);
+  const handlePan = useCallback(
+    (
+      offsetX: number,
+      offsetY: number,
+      containerWidth?: number,
+      containerHeight?: number,
+      pageWidth?: number,
+      pageHeight?: number,
+    ) => {
+      setOffset(
+        offsetX,
+        offsetY,
+        containerWidth,
+        containerHeight,
+        pageWidth,
+        pageHeight,
+      );
+    },
+    [setOffset],
+  );
 
   const showUI = useCallback(() => {
     setIsUIVisible(true);
@@ -244,7 +305,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     pdfDocument,
     loadState,
     loadPdf,
-    
+
     // ページ関連
     currentPage,
     handlePageChange,
@@ -252,12 +313,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     goToNextPage,
     goToFirstPage,
     goToLastPage,
-    
+
     // UI状態
     isUIVisible,
     showUI,
     hideUI,
-    
+
     // 設定関連
     viewMode: settings.viewMode,
     readingDirection: settings.readingDirection,
@@ -266,7 +327,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     toggleReadingDirection,
     toggleTreatFirstPageAsCover,
     resetToDefaults,
-    
+
     // ズーム関連
     zoomState,
     calculateFitScale,
@@ -274,11 +335,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     handleZoomOut,
     cycleFitMode,
     handlePan,
-    
+
     // フルスクリーン関連
     isFullscreen,
     toggleFullscreen,
-    
+
     // ファイル操作関連
     handleFileSelect,
     handleDragOver,
@@ -286,16 +347,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={contextValue}>
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
 };
 
 export const useAppContext = (): AppContextType => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
 };

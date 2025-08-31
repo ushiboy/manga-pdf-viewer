@@ -1,7 +1,7 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // PDF.jsワーカーのモック設定（テスト環境では無効化）
-Object.defineProperty(window, 'Worker', {
+Object.defineProperty(window, "Worker", {
   writable: true,
   value: class MockWorker {
     constructor(stringUrl: string | URL) {
@@ -9,15 +9,15 @@ Object.defineProperty(window, 'Worker', {
       this.onmessage = null;
       this.onerror = null;
     }
-    
+
     url: string | URL;
     onmessage: ((event: MessageEvent) => void) | null;
     onerror: ((event: ErrorEvent) => void) | null;
-    
+
     postMessage() {
       // Mock implementation
     }
-    
+
     terminate() {
       // Mock implementation
     }
@@ -60,9 +60,9 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
 }));
 
 // matchMedia のモック
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -75,5 +75,5 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // URL.createObjectURL のモック
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
 global.URL.revokeObjectURL = vi.fn();

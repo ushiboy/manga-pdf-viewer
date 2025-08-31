@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '../ui/Button';
-import { SettingsIcon, CloseIcon } from '../icons';
+import React from "react";
+import { Button } from "../ui/Button";
+import { SettingsIcon, CloseIcon } from "../icons";
 
 interface ModalHeaderProps {
   onClose: () => void;
@@ -9,7 +9,7 @@ interface ModalHeaderProps {
 export const ModalHeader: React.FC<ModalHeaderProps> = ({ onClose }) => {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-      <h2 
+      <h2
         id="settings-title"
         className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center"
       >

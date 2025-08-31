@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const ThemeSection: React.FC = () => {
   return (
@@ -15,7 +15,9 @@ export const ThemeSection: React.FC = () => {
             disabled
             className="text-blue-600 focus:ring-blue-500"
           />
-          <span className="text-gray-400 dark:text-gray-500">ライト（システム設定に従う）</span>
+          <span className="text-gray-400 dark:text-gray-500">
+            ライト（システム設定に従う）
+          </span>
         </label>
         <label className="flex items-center space-x-3 cursor-pointer">
           <input
@@ -25,7 +27,9 @@ export const ThemeSection: React.FC = () => {
             disabled
             className="text-blue-600 focus:ring-blue-500"
           />
-          <span className="text-gray-400 dark:text-gray-500">ダーク（システム設定に従う）</span>
+          <span className="text-gray-400 dark:text-gray-500">
+            ダーク（システム設定に従う）
+          </span>
         </label>
       </div>
     </fieldset>

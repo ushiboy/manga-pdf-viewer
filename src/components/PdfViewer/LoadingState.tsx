@@ -1,5 +1,5 @@
-import React from 'react';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+import React from "react";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 interface LoadingStateProps {
   progress: number;
@@ -7,7 +7,7 @@ interface LoadingStateProps {
 
 export const LoadingState: React.FC<LoadingStateProps> = ({ progress }) => {
   return (
-    <div 
+    <div
       className="flex-1 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
       role="status"
       aria-live="polite"
@@ -19,7 +19,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({ progress }) => {
           PDFを読み込んでいます...
         </p>
         {progress > 0 && (
-          <div 
+          <div
             className="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2"
             role="progressbar"
             aria-valuenow={progress}

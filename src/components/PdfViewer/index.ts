@@ -1,1 +1,1 @@
-export { PdfViewer } from './PdfViewer';
+export { PdfViewer } from "./PdfViewer";

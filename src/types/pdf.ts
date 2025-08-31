@@ -1,4 +1,4 @@
-import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 
 export interface PdfDocument {
   document: PDFDocumentProxy;

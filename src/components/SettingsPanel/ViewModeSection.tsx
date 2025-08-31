@@ -1,6 +1,6 @@
-import React from 'react';
-import type { ViewMode } from '../../types/settings';
-import { SpreadPageIcon } from '../icons';
+import React from "react";
+import type { ViewMode } from "../../types/settings";
+import { SpreadPageIcon } from "../icons";
 
 interface ViewModeSectionProps {
   viewMode: ViewMode;
@@ -9,7 +9,7 @@ interface ViewModeSectionProps {
 
 export const ViewModeSection: React.FC<ViewModeSectionProps> = ({
   viewMode,
-  onToggleViewMode
+  onToggleViewMode,
 }) => {
   return (
     <fieldset>
@@ -22,7 +22,7 @@ export const ViewModeSection: React.FC<ViewModeSectionProps> = ({
           <input
             type="radio"
             name="viewMode"
-            checked={viewMode === 'single'}
+            checked={viewMode === "single"}
             onChange={onToggleViewMode}
             className="text-blue-600 focus:ring-blue-500"
           />
@@ -32,7 +32,7 @@ export const ViewModeSection: React.FC<ViewModeSectionProps> = ({
           <input
             type="radio"
             name="viewMode"
-            checked={viewMode === 'spread'}
+            checked={viewMode === "spread"}
             onChange={onToggleViewMode}
             className="text-blue-600 focus:ring-blue-500"
           />
