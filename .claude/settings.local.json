@@ -21,7 +21,11 @@
       "Bash(pnpm test:run:*)",
       "Bash(git push:*)",
       "Bash(git pull:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_close"
     ],
     "deny": [],
     "ask": []

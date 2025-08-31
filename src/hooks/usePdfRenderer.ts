@@ -5,6 +5,7 @@ import type { ViewMode, ReadingDirection, ZoomState } from "../types/settings";
 interface UsePdfRendererProps {
   pdfDocument: PdfDocument | null;
   currentPage: number;
+  renderPage: number; // PDF描画用のページ状態
   viewMode: ViewMode;
   readingDirection: ReadingDirection;
   treatFirstPageAsCover: boolean;
@@ -31,7 +32,8 @@ interface RenderTasks {
 
 export const usePdfRenderer = ({
   pdfDocument,
-  currentPage,
+  currentPage: _currentPage,
+  renderPage,
   viewMode,
   readingDirection,
   treatFirstPageAsCover,
@@ -113,7 +115,7 @@ export const usePdfRenderer = ({
     if (!pdfDocument?.document || !leftCanvasRef.current) return;
 
     const canvas = leftCanvasRef.current;
-    const page = await pdfDocument.document.getPage(currentPage);
+    const page = await pdfDocument.document.getPage(renderPage);
     const viewport = page.getViewport({ scale: 1 });
 
     const { containerWidth, containerHeight } = getContainerSize();
@@ -143,25 +145,25 @@ export const usePdfRenderer = ({
     let rightPageNum: number;
 
     if (treatFirstPageAsCover) {
-      if (currentPage === 1) {
+      if (renderPage === 1) {
         leftPageNum = 1;
         rightPageNum = 0;
       } else {
         if (readingDirection === "rtl") {
-          leftPageNum = currentPage + 1;
-          rightPageNum = currentPage;
+          leftPageNum = renderPage + 1;
+          rightPageNum = renderPage;
         } else {
-          leftPageNum = currentPage;
-          rightPageNum = currentPage + 1;
+          leftPageNum = renderPage;
+          rightPageNum = renderPage + 1;
         }
       }
     } else {
       if (readingDirection === "rtl") {
-        leftPageNum = currentPage + 1;
-        rightPageNum = currentPage;
+        leftPageNum = renderPage + 1;
+        rightPageNum = renderPage;
       } else {
-        leftPageNum = currentPage;
-        rightPageNum = currentPage + 1;
+        leftPageNum = renderPage;
+        rightPageNum = renderPage + 1;
       }
     }
 
@@ -291,7 +293,7 @@ export const usePdfRenderer = ({
     };
   }, [
     pdfDocument,
-    currentPage,
+    renderPage,
     viewMode,
     zoomState,
     treatFirstPageAsCover,

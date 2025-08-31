@@ -3,8 +3,10 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
   ReactNode,
 } from "react";
+import { debounce } from "lodash";
 import { usePdfDocument } from "../hooks/usePdfDocument";
 import { useSettings } from "../hooks/useSettings";
 import { useZoom } from "../hooks/useZoom";
@@ -21,6 +23,7 @@ interface AppContextType {
 
   // ページ関連
   currentPage: number;
+  renderPage: number; // PDF描画用のページ状態
   handlePageChange: (page: number) => void;
   goToPreviousPage: () => void;
   goToNextPage: () => void;
@@ -80,6 +83,7 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [renderPage, setRenderPage] = useState(1); // PDF描画用のページ状態
   const [isUIVisible, setIsUIVisible] = useState(true);
 
   // 既存のhooksを使用
@@ -109,6 +113,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     (file: File) => {
       loadPdf(file);
       setCurrentPage(1);
+      setRenderPage(1);
     },
     [loadPdf],
   );
@@ -133,14 +138,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     [handleFileSelect],
   );
 
+  // PDF描画用のページ更新をdebounceした関数
+  const debouncedSetRenderPage = useCallback(
+    debounce((page: number) => {
+      setRenderPage(page);
+    }, 250), // 250msの遅延でバッファリング
+    [],
+  );
+
+  // debounce関数のクリーンアップ
+  useEffect(() => {
+    return () => {
+      debouncedSetRenderPage.cancel();
+    };
+  }, [debouncedSetRenderPage]);
+
+
   const handlePageChange = useCallback(
     (page: number) => {
       if (!pdfDocument) return;
 
       const clampedPage = Math.max(1, Math.min(page, pdfDocument.numPages));
+      
+      // UI用のページ状態は即座に更新（ページ番号表示など）
       setCurrentPage(clampedPage);
+      
+      // PDF描画用のページ状態は遅延更新（重い描画処理を抑制）
+      debouncedSetRenderPage(clampedPage);
     },
-    [pdfDocument],
+    [pdfDocument, debouncedSetRenderPage],
   );
 
   const goToPreviousPage = useCallback(() => {
@@ -308,6 +334,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     // ページ関連
     currentPage,
+    renderPage,
     handlePageChange,
     goToPreviousPage,
     goToNextPage,
