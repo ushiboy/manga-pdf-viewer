@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button } from '../ui/Button';
+import React from "react";
+import { Button } from "../ui/Button";
 
 interface ResetSectionProps {
   onResetSettings: () => void;
@@ -8,17 +8,17 @@ interface ResetSectionProps {
 
 export const ResetSection: React.FC<ResetSectionProps> = ({
   onResetSettings,
-  onClose
+  onClose,
 }) => {
   const handleResetSettings = () => {
     const confirmed = window.confirm(
-      '設定を初期値に戻しますか？\n\n' +
-      '• 表示方式: 単一ページ\n' +
-      '• 読み方向: 右→左（日本語）\n' +
-      '• 表紙モード: ON（1ページ目を表紙として単独表示）\n\n' +
-      'この操作は取り消せません。'
+      "設定を初期値に戻しますか？\n\n" +
+        "• 表示方式: 単一ページ\n" +
+        "• 読み方向: 右→左（日本語）\n" +
+        "• 表紙モード: ON（1ページ目を表紙として単独表示）\n\n" +
+        "この操作は取り消せません。",
     );
-    
+
     if (confirmed) {
       onResetSettings();
       // リセット後にパネルを閉じる

@@ -46,13 +46,13 @@ https://ushiboy.github.io/manga-pdf-viewer/
 
 ### 3. Basic Controls
 
-| Action     | Mouse       | Keyboard | Touch            |
-| ---------- | ----------- | -------- | ---------------- |
-| Next Page  | Left Click  | → Key    | Right Swipe/Tap  |
-| Prev Page  | Right Click | ← Key    | Left Swipe/Tap   |
-| Zoom       | Wheel       | +/-      | Pinch            |
-| Fullscreen | Button      | F11      | -                |
-| View Toggle| Button      | V        | -                |
+| Action      | Mouse       | Keyboard | Touch           |
+| ----------- | ----------- | -------- | --------------- |
+| Next Page   | Left Click  | → Key    | Right Swipe/Tap |
+| Prev Page   | Right Click | ← Key    | Left Swipe/Tap  |
+| Zoom        | Wheel       | +/-      | Pinch           |
+| Fullscreen  | Button      | F11      | -               |
+| View Toggle | Button      | V        | -               |
 
 ### 4. PWA Installation
 

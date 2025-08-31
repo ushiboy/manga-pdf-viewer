@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '../ui/Button';
-import { MenuIcon } from '../icons';
+import React from "react";
+import { Button } from "../ui/Button";
+import { MenuIcon } from "../icons";
 
 interface FloatingShowButtonProps {
   isVisible: boolean;
@@ -9,12 +9,12 @@ interface FloatingShowButtonProps {
 
 export const FloatingShowButton: React.FC<FloatingShowButtonProps> = ({
   isVisible,
-  onShow
+  onShow,
 }) => {
   if (isVisible) return null;
 
   return (
-    <div 
+    <div
       className="fixed top-4 left-4 z-50"
       role="region"
       aria-label="UI controls"

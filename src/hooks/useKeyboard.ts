@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import type { ReadingDirection } from '../types/settings';
+import { useEffect } from "react";
+import type { ReadingDirection } from "../types/settings";
 
 interface UseKeyboardProps {
   onPreviousPage: () => void;
@@ -26,46 +26,46 @@ export const useKeyboard = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       // 入力フィールドにフォーカスがある場合はキーボードショートカットを無効化
       const target = event.target as Element;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         return;
       }
 
       switch (event.key) {
-        case 'ArrowLeft':
-        case 'Left':
+        case "ArrowLeft":
+        case "Left":
           event.preventDefault();
           // RTL（右→左読み）の場合は左キーで次のページ、LTR（左→右読み）の場合は前のページ
-          if (readingDirection === 'rtl') {
+          if (readingDirection === "rtl") {
             onNextPage();
           } else {
             onPreviousPage();
           }
           break;
-        case 'ArrowRight':
-        case 'Right':
+        case "ArrowRight":
+        case "Right":
           event.preventDefault();
           // RTL（右→左読み）の場合は右キーで前のページ、LTR（左→右読み）の場合は次のページ
-          if (readingDirection === 'rtl') {
+          if (readingDirection === "rtl") {
             onPreviousPage();
           } else {
             onNextPage();
           }
           break;
-        case 'F11':
+        case "F11":
           if (onFullscreen) {
             event.preventDefault();
             onFullscreen();
           }
           break;
-        case '+':
-        case '=':
+        case "+":
+        case "=":
           if (onZoomIn) {
             event.preventDefault();
             onZoomIn();
           }
           break;
-        case '-':
-        case '_':
+        case "-":
+        case "_":
           if (onZoomOut) {
             event.preventDefault();
             onZoomOut();
@@ -76,10 +76,18 @@ export const useKeyboard = ({
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onPreviousPage, onNextPage, onFullscreen, enabled, readingDirection, onZoomIn, onZoomOut]);
+  }, [
+    onPreviousPage,
+    onNextPage,
+    onFullscreen,
+    enabled,
+    readingDirection,
+    onZoomIn,
+    onZoomOut,
+  ]);
 };
