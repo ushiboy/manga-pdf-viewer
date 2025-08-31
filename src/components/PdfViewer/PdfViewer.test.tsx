@@ -51,6 +51,7 @@ describe("PdfViewer", () => {
 
     // ページ関連
     currentPage: 1,
+    renderPage: 1,
     handlePageChange: vi.fn(),
     goToPreviousPage: vi.fn(),
     goToNextPage: vi.fn(),

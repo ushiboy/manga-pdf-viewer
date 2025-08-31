@@ -14,6 +14,7 @@ interface PdfCanvasProps {
 export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
   const {
     currentPage,
+    renderPage,
     isUIVisible,
     viewMode,
     readingDirection,
@@ -33,6 +34,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
     usePdfRenderer({
       pdfDocument,
       currentPage,
+      renderPage,
       viewMode,
       readingDirection,
       treatFirstPageAsCover,
@@ -137,8 +139,8 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
             role="img"
             aria-label={
               viewMode === "spread"
-                ? `左ページ ${readingDirection === "rtl" ? currentPage + 1 : currentPage}`
-                : `ページ ${currentPage}`
+                ? `左ページ ${readingDirection === "rtl" ? renderPage + 1 : renderPage}`
+                : `ページ ${renderPage}`
             }
           />
           <canvas
@@ -146,7 +148,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({ pdfDocument }) => {
             className="shadow-lg border border-gray-200 dark:border-gray-600 bg-white pointer-events-none max-w-none"
             style={{ display: viewMode === "spread" ? "block" : "none" }}
             role="img"
-            aria-label={`右ページ ${readingDirection === "rtl" ? currentPage : currentPage + 1}`}
+            aria-label={`右ページ ${readingDirection === "rtl" ? renderPage : renderPage + 1}`}
           />
         </div>
       )}
