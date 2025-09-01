@@ -33,6 +33,9 @@ jobs:
       - name: Run TypeScript type check
         run: pnpm type-check
 
+      - name: Lint code
+        run: pnpm lint
+
       - name: Run tests
         run: pnpm test:run
 
