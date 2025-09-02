@@ -89,9 +89,13 @@ export const useSettings = () => {
   // 初期読み込み時に設定をlocalStorageから復元
   useEffect(() => {
     const initialSettings = loadSettings();
-    if (JSON.stringify(initialSettings) !== JSON.stringify(settings)) {
-      setSettings(initialSettings);
-    }
+    setSettings((currentSettings) => {
+      // 現在の設定と読み込み設定が異なる場合のみ更新
+      if (JSON.stringify(currentSettings) !== JSON.stringify(initialSettings)) {
+        return initialSettings;
+      }
+      return currentSettings;
+    });
   }, []);
 
   return {

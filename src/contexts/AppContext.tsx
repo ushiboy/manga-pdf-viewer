@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 import { debounce } from "lodash";
@@ -139,8 +140,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   );
 
   // PDF描画用のページ更新をdebounceした関数
-  const debouncedSetRenderPage = useCallback(
-    debounce((page: number) => {
+  const debouncedSetRenderPage = useMemo(
+    () => debounce((page: number) => {
       setRenderPage(page);
     }, 250), // 250msの遅延でバッファリング
     [],

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PdfDocument } from "../types/pdf";
 import type { ViewMode, ReadingDirection, ZoomState } from "../types/settings";
 
@@ -49,7 +49,7 @@ export const usePdfRenderer = ({
   const renderTasksRef = useRef<RenderTasks>({});
 
   // 共通のキャンバス設定関数
-  const setupCanvas = (
+  const setupCanvas = useCallback((
     canvas: HTMLCanvasElement,
     scaledViewport: any,
     devicePixelRatio: number,
@@ -75,10 +75,10 @@ export const usePdfRenderer = ({
     }
 
     return context;
-  };
+  }, [zoomState]);
 
   // スケール計算関数
-  const calculateScale = (
+  const calculateScale = useCallback((
     viewport: any,
     containerWidth: number,
     containerHeight: number,
@@ -100,18 +100,18 @@ export const usePdfRenderer = ({
     }
 
     return 1;
-  };
+  }, [zoomState, calculateFitScale]);
 
   // コンテナサイズ計算
-  const getContainerSize = () => {
+  const getContainerSize = useCallback(() => {
     const containerWidth = window.innerWidth - 32;
     const uiHeight = isUIVisible ? 120 : 16;
     const containerHeight = window.innerHeight - uiHeight;
     return { containerWidth, containerHeight };
-  };
+  }, [isUIVisible]);
 
   // 単ページレンダリング
-  const renderSinglePage = async (): Promise<void> => {
+  const renderSinglePage = useCallback(async (): Promise<void> => {
     if (!pdfDocument?.document || !leftCanvasRef.current) return;
 
     const canvas = leftCanvasRef.current;
@@ -134,10 +134,11 @@ export const usePdfRenderer = ({
 
     renderTasksRef.current.single = renderTask;
     await renderTask.promise;
-  };
+    renderTasksRef.current.single = undefined;
+  }, [pdfDocument, renderPage, calculateScale, setupCanvas, getContainerSize]);
 
   // 見開きページ番号計算
-  const calculateSpreadPages = (): {
+  const calculateSpreadPages = useCallback((): {
     leftPageNum: number;
     rightPageNum: number;
   } => {
@@ -168,10 +169,10 @@ export const usePdfRenderer = ({
     }
 
     return { leftPageNum, rightPageNum };
-  };
+  }, [treatFirstPageAsCover, renderPage, readingDirection]);
 
   // 見開き用キャンバスレンダリング
-  const renderCanvas = async (
+  const renderCanvas = useCallback(async (
     canvas: HTMLCanvasElement,
     pageNum: number,
     taskKey: "left" | "right",
@@ -206,10 +207,10 @@ export const usePdfRenderer = ({
 
     renderTasksRef.current[taskKey] = renderTask;
     await renderTask.promise;
-  };
+  }, [pdfDocument, getContainerSize, calculateScale, setupCanvas]);
 
-  // 見開きレンダリング
-  const renderSpreadPages = async (): Promise<void> => {
+  // 見開きレンダリング  
+  const renderSpreadPages = useCallback(async (): Promise<void> => {
     if (!leftCanvasRef.current || !rightCanvasRef.current) return;
 
     const { leftPageNum, rightPageNum } = calculateSpreadPages();
@@ -218,10 +219,10 @@ export const usePdfRenderer = ({
       renderCanvas(leftCanvasRef.current, leftPageNum, "left"),
       renderCanvas(rightCanvasRef.current, rightPageNum, "right"),
     ]);
-  };
+  }, [calculateSpreadPages, renderCanvas]);
 
   // レンダリング実行タスクのキャンセル
-  const cancelRenderTasks = async (): Promise<void> => {
+  const cancelRenderTasks = useCallback(async (): Promise<void> => {
     const tasks = renderTasksRef.current;
     const cancelPromises = [];
 
@@ -245,10 +246,10 @@ export const usePdfRenderer = ({
       await Promise.all(cancelPromises);
       await new Promise((resolve) => setTimeout(resolve, 10));
     }
-  };
+  }, []);
 
   // メインのレンダリング関数
-  const renderPages = async (): Promise<void> => {
+  const renderPages = useCallback(async (): Promise<void> => {
     if (!pdfDocument?.document || isRenderingRef.current) return;
 
     try {
@@ -270,26 +271,24 @@ export const usePdfRenderer = ({
       isRenderingRef.current = false;
       setIsRendering(false);
     }
-  };
+  }, [pdfDocument, viewMode, renderSinglePage, renderSpreadPages, cancelRenderTasks]);
 
   // レンダリングeffect
   useEffect(() => {
     renderPages();
 
+    // レンダリングタスクのrefをエフェクト開始時にキャプチャ
+    const tasksRef = renderTasksRef.current;
+    
     return () => {
-      const tasks = renderTasksRef.current;
-      if (tasks.single) {
-        tasks.single.cancel();
-        tasks.single = undefined;
-      }
-      if (tasks.left) {
-        tasks.left.cancel();
-        tasks.left = undefined;
-      }
-      if (tasks.right) {
-        tasks.right.cancel();
-        tasks.right = undefined;
-      }
+      // キャプチャしたrefを使用してクリーンアップ
+      Object.keys(tasksRef).forEach((key) => {
+        const task = tasksRef[key as keyof typeof tasksRef];
+        if (task) {
+          task.cancel();
+          tasksRef[key as keyof typeof tasksRef] = undefined;
+        }
+      });
     };
   }, [
     pdfDocument,
@@ -299,6 +298,7 @@ export const usePdfRenderer = ({
     treatFirstPageAsCover,
     readingDirection,
     isUIVisible,
+    renderPages,
   ]);
 
   return {
