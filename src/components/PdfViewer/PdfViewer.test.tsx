@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import { PdfViewer } from "./PdfViewer";
 import { useAppContext } from "../../contexts";
 import type { PdfDocument, PdfLoadState } from "../../types/pdf";
@@ -208,66 +208,85 @@ describe("PdfViewer", () => {
   });
 
   describe("PDF Rendering", () => {
-    it("should render PDF display area", () => {
-      const { getByRole } = render(<PdfViewer />);
+    it("should render PDF display area", async () => {
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const pdfViewer = getByRole("main", {
+      const pdfViewer = component!.getByRole("main", {
         name: /PDFビューワー ページ 1 \/ 10/,
       });
       expect(pdfViewer).toBeInTheDocument();
 
-      const pdfDisplayArea = getByRole("region", { name: "PDF表示領域" });
+      const pdfDisplayArea = component!.getByRole("region", { name: "PDF表示領域" });
       expect(pdfDisplayArea).toBeInTheDocument();
     });
 
-    it("should show single page layout in single view mode", () => {
+    it("should show single page layout in single view mode", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         viewMode: "single",
       });
 
-      const { getByRole } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const pdfViewer = getByRole("main", { name: /単ページ表示/ });
+      const pdfViewer = component!.getByRole("main", { name: /単ページ表示/ });
       expect(pdfViewer).toBeInTheDocument();
     });
 
-    it("should show spread layout in spread view mode", () => {
+    it("should show spread layout in spread view mode", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         viewMode: "spread",
       });
 
-      const { getByRole } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const pdfViewer = getByRole("main", { name: /見開き表示/ });
+      const pdfViewer = component!.getByRole("main", { name: /見開き表示/ });
       expect(pdfViewer).toBeInTheDocument();
     });
   });
 
   describe("View Mode Changes", () => {
-    it("should update aria-label when viewMode changes from single to spread", () => {
+    it("should update aria-label when viewMode changes from single to spread", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         viewMode: "single",
       });
 
-      const { getByRole, rerender } = render(<PdfViewer />);
-      expect(getByRole("main", { name: /単ページ表示/ })).toBeInTheDocument();
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
+      
+      expect(component!.getByRole("main", { name: /単ページ表示/ })).toBeInTheDocument();
 
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         viewMode: "spread",
       });
 
-      rerender(<PdfViewer />);
+      await act(async () => {
+        component!.rerender(<PdfViewer />);
+      });
 
-      expect(getByRole("main", { name: /見開き表示/ })).toBeInTheDocument();
+      expect(component!.getByRole("main", { name: /見開き表示/ })).toBeInTheDocument();
     });
   });
 
   describe("Zoom Functionality", () => {
-    it("should show grab cursor when in custom zoom mode", () => {
+    it("should show grab cursor when in custom zoom mode", async () => {
       const customZoomState = {
         ...mockZoomState,
         fitMode: "custom" as FitMode,
@@ -278,53 +297,69 @@ describe("PdfViewer", () => {
         calculateFitScale: mockCalculateFitScale,
       });
 
-      const { container } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const viewerContainer = container.firstChild as HTMLElement;
+      const viewerContainer = component!.container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass("cursor-grab");
     });
 
-    it("should show pointer cursor when not in custom zoom mode", () => {
+    it("should show pointer cursor when not in custom zoom mode", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         zoomState: mockZoomState,
         calculateFitScale: mockCalculateFitScale,
       });
 
-      const { container } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const viewerContainer = container.firstChild as HTMLElement;
+      const viewerContainer = component!.container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass("cursor-pointer");
     });
 
-    it("should accept zoom-related props", () => {
+    it("should accept zoom-related props", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         zoomState: mockZoomState,
         calculateFitScale: mockCalculateFitScale,
       });
 
-      const { getByRole } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const pdfViewer = getByRole("main", { name: /PDFビューワー/ });
+      const pdfViewer = component!.getByRole("main", { name: /PDFビューワー/ });
       expect(pdfViewer).toBeInTheDocument();
     });
   });
 
   describe("Click Navigation", () => {
-    it("should render clickable area for navigation", () => {
+    it("should render clickable area for navigation", async () => {
       mockUseAppContext.mockReturnValue({
         ...defaultContextValue,
         viewMode: "single",
       });
 
-      const { container } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const viewerContainer = container.firstChild as HTMLElement;
+      const viewerContainer = component!.container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass("cursor-pointer");
     });
 
-    it("should not show click cursor when in custom zoom mode", () => {
+    it("should not show click cursor when in custom zoom mode", async () => {
       const customZoomState = {
         ...mockZoomState,
         fitMode: "custom" as FitMode,
@@ -335,9 +370,13 @@ describe("PdfViewer", () => {
         calculateFitScale: mockCalculateFitScale,
       });
 
-      const { container } = render(<PdfViewer />);
+      let component: ReturnType<typeof render>;
+      
+      await act(async () => {
+        component = render(<PdfViewer />);
+      });
 
-      const viewerContainer = container.firstChild as HTMLElement;
+      const viewerContainer = component!.container.firstChild as HTMLElement;
       expect(viewerContainer).toHaveClass("cursor-grab");
       expect(viewerContainer).not.toHaveClass("cursor-pointer");
     });
